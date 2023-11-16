@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Josefin Sans
+- Font Author: Copyright 2010 The Josefin Sans Project Authors (https://github.com/ThomasJockin/JosefinSansFont-master), with Reserved Font Name "Josefin Sans".
+- Font Source: http://fonts.gstatic.com/s/josefinsans/v32/Qw3JZQNVED7rKGKxtqIqX5EUCGZ2dIn0FyA96fCTNIJhKibpUV3MEQ.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))

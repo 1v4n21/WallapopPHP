@@ -1,9 +1,10 @@
 <?php 
 
-class ConnexionDB{
+class ConexionDB{
 
     private $conn;
-
+    
+    //Constructor
     function __construct($user, $password, $host, $database)
     {
         $this->conn = new mysqli($host,$user,$password,$database);
@@ -12,8 +13,8 @@ class ConnexionDB{
         }
     }
 
+    //Obtener conexion de la DB
     function getConnexion(){
         return $this->conn;
     }
-
-}
+} 
