@@ -38,7 +38,7 @@ html, body {
     width: 100%;
     color: hsl(var(--text-primary));
     font-family: var(--font-main);
-    background-color: grey;
+    background-color: #6495ED;
     -webkit-font-smoothing: antialiased;
     scroll-behavior: smooth;
     box-sizing: border-box;
@@ -429,4 +429,8 @@ select {
 }
 @media only screen and (max-width: 496px) {
 
+}
+
+.footer{
+    background-color: hsl(var(--background-secondary));
 }
