@@ -1,6 +1,35 @@
-<?php 
+<?php
     session_start();
+    require_once 'modelos/ConexionDB.php';
+    require_once 'modelos/Usuario.php';
+    require_once 'modelos/UsuariosDAO.php';
     require_once 'modelos/funciones.php';
+    require_once 'modelos/config.php';
+    require_once 'modelos/Sesion.php';
+
+    // Creamos la conexión utilizando la clase que hemos creado
+    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+    $conn = $connexionDB->getConnexion();
+
+    // Si existe la cookie y no ha iniciado sesión, le iniciamos sesión de forma automática
+    if (!Sesion::getUsuario() && isset($_COOKIE['sid'])) {
+
+        // Nos conectamos para obtener el id y la foto del usuario
+        $usuariosDAO = new UsuariosDAO($conn);
+        $usuario = $usuariosDAO->getBySid($_COOKIE['sid']);
+
+        if ($usuario) {
+            // Inicio sesión
+            Sesion::iniciarSesion($usuario);
+
+            // Creamos la cookie para que nos recuerde 7 días
+            setcookie('sid', $usuario->getSid(), time() + 7 * 24 * 60 * 60, '/');
+        }
+
+    }
+
+    // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+    $connexionDB->cerrarConexion();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -117,6 +146,7 @@
     </header>
     <main id="main" class="flexbox-col">
 
+        <!-- Mensaje de error -->     
         <?php imprimirMensaje(); ?>
 
         <!--JavaScript-->

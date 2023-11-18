@@ -1,5 +1,68 @@
 <?php
+    session_start();
+    require_once 'modelos/funciones.php';
+    require_once 'modelos/ConexionDB.php';
+    require_once 'modelos/Usuario.php';
+    require_once 'modelos/UsuariosDAO.php';
+    require_once 'modelos/config.php';
 
+    // Creamos la conexión utilizando la clase que hemos creado
+    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+    $conn = $connexionDB->getConnexion();
+
+    if (isset($_COOKIE['email'])) {
+
+        // Si existe la cookie iniciamos sesión de forma automática
+        $_SESSION['email'] = $_COOKIE['email'];
+
+        // Iniciamos sesión con el usuario de la cookie
+        header('Location:index.php');
+        die();
+    }
+
+    // Inicializo variables
+    $email = $password = $password2 = '';
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        // Recojo datos del formulario
+        $email = htmlspecialchars(trim($_POST['email']));
+        $password = htmlspecialchars(trim($_POST['password']));
+        $password2 = htmlspecialchars(trim($_POST['password2']));
+
+        $usuariosDAO = new UsuariosDAO($conn);
+
+        // Validación
+        // Verificar si el email ya existe en la base de datos
+        $usuarioExistente = $usuariosDAO->getByEmail($email);
+
+        if ($usuarioExistente) {
+
+            // El email ya existe en la base de datos
+            guardarMensaje("El email ya está registrado. Por favor, elige otro.");
+
+        } elseif ($password != $password2) {
+
+            // Las contraseñas no coinciden
+            guardarMensaje("Las contraseñas no coinciden.");
+
+        } else {
+
+            // Crear el nuevo usuario en la base de datos
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+            $usuarioNuevo = new Usuario($email, $hashedPassword, /*otros campos*/);
+            $usuariosDAO->insertarUsuario($usuarioNuevo);
+
+            // Iniciar sesión con el nuevo usuario
+            $_SESSION['email'] = $email;
+            setcookie('user', $email, time() + 60 * 60 * 24);
+
+            header('Location:index.php');
+            die();
+            
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -83,6 +146,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Contraseña2 -->
                         <div class="flex -mx-3">
                             <div class="w-full px-3 mb-12">
                                 <label for="" class="text-xs font-semibold px-1">Confirma Contraseña</label>
@@ -92,6 +157,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Contraseña2 -->
                         <div class="flex -mx-3">
                             <div class="w-full px-3 mb-5">
                                 <button class="block w-full max-w-xs mx-auto bg-blue-500 hover:bg-blue-700 focus:bg-blue-700 text-white rounded-lg px-3 py-3 font-semibold">REGISTRATE AHORA</button>
