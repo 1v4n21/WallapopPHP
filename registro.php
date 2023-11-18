@@ -5,30 +5,24 @@
     require_once 'modelos/Usuario.php';
     require_once 'modelos/UsuariosDAO.php';
     require_once 'modelos/config.php';
+    require_once 'modelos/Sesion.php';
 
     // Creamos la conexión utilizando la clase que hemos creado
     $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
     $conn = $connexionDB->getConnexion();
 
-    if (isset($_COOKIE['email'])) {
-
-        // Si existe la cookie iniciamos sesión de forma automática
-        $_SESSION['email'] = $_COOKIE['email'];
-
-        // Iniciamos sesión con el usuario de la cookie
-        header('Location:index.php');
-        die();
-    }
-
     // Inicializo variables
-    $email = $password = $password2 = '';
+    $email = $password = $password2 = $nombre = $poblacion = $telefono = '';
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Recojo datos del formulario
+        $nombre = htmlspecialchars(trim($_POST['nombre']));
+        $telefono = htmlspecialchars(trim($_POST['telefono']));
+        $poblacion = htmlspecialchars(trim($_POST['poblacion']));
         $email = htmlspecialchars(trim($_POST['email']));
         $password = htmlspecialchars(trim($_POST['password']));
-        $password2 = htmlspecialchars(trim($_POST['password2']));
+        $password2 = htmlspecialchars(trim($_POST['password1']));
 
         $usuariosDAO = new UsuariosDAO($conn);
 
@@ -48,20 +42,36 @@
 
         } else {
 
+            //Ciframos la contraseña
+            $passwordCifrado = password_hash($password, PASSWORD_DEFAULT);
+
             // Crear el nuevo usuario en la base de datos
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $usuario = new Usuario();
+            $usuario->setSid(sha1(rand()+time()), true);
+            $usuario->setEmail($email);
+            $usuario->setPassword($passwordCifrado);
+            $usuario->setNombre($nombre);
+            $usuario->setTelefono($telefono);
+            $usuario->setPoblacion($poblacion);
 
-            $usuarioNuevo = new Usuario($email, $hashedPassword, /*otros campos*/);
-            $usuariosDAO->insertarUsuario($usuarioNuevo);
+            if($usuariosDAO->insert($usuario)){
 
-            // Iniciar sesión con el nuevo usuario
-            $_SESSION['email'] = $email;
-            setcookie('user', $email, time() + 60 * 60 * 24);
+                // Iniciar sesión con el nuevo usuario
+                Sesion::iniciarSesion($usuario);
 
-            header('Location:index.php');
-            die();
-            
+                setcookie('sid', $usuario->getSid(), time() + 7 * 60 * 60 * 24);
+
+                //Redirecciona a index.php
+                header("location: index.php");
+                die();
+
+            }else{
+                guardarMensaje("No se ha podido registrar el usuario.");
+            }        
         }
+
+        // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+        $connexionDB->cerrarConexion();
     }
 ?>
 <!DOCTYPE html>
@@ -80,6 +90,26 @@
     <!--Link para TailWind-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 
+    <!-- Link jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- CSS -->
+    <style>
+        .error {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
 
@@ -89,6 +119,16 @@
         <span class="font-bold ml-2">ShopSwap</span>
     </a>
 
+    <!-- Mensaje de error -->    
+    <?php imprimirMensaje(); ?>
+
+    <!--JavaScript-->
+    <script>
+        // Muestra el mensaje de error al cargar la página
+        $(document).ready(function () {
+              $(".error").fadeIn().delay(5000).fadeOut();
+        });
+    </script>
 
     <!-- Formulario de Registro -->
     <div class="min-w-screen min-h-screen bg-gray-900 flex items-center justify-center px-5 py-5">
@@ -102,7 +142,9 @@
                         <h1 class="font-bold text-3xl text-gray-900">REGISTRO</h1>
                         <p>Introduce tus datos para resgistrate</p>
                     </div>
-                    <div>
+
+
+                    <form action="registro.php" method="post"> <!-- Formulario -->
                         <div class="flex -mx-3">
 
                             <!-- Nombre -->
@@ -110,7 +152,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Nombre</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                    <input type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Jose">
+                                    <input name="nombre" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Jose">
                                 </div>
                             </div>
 
@@ -119,7 +161,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Numero de Telefono</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                    <input type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="620089213">
+                                    <input name="telefono" type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="620089213">
                                 </div>
                             </div>
                         </div>
@@ -130,7 +172,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Poblacion</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
-                                    <input type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Tomelloso">
+                                    <input name="poblacion" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Tomelloso">
                                 </div>
                             </div>
                         </div>
@@ -141,7 +183,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Email</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
-                                    <input type="email" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="josemartin@example.com">
+                                    <input name="email" type="email" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="josemartin@example.com">
                                 </div>
                             </div>
                         </div>
@@ -152,7 +194,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Contraseña</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-lock-outline text-gray-400 text-lg"></i></div>
-                                    <input type="password" name="password1" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
+                                    <input name="password" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
                                 </div>
                             </div>
                         </div>
@@ -163,7 +205,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Confirma Contraseña</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-lock-outline text-gray-400 text-lg"></i></div>
-                                    <input type="password" name="password2" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
+                                    <input name="password1" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
                                 </div>
                             </div>
                         </div>
@@ -174,7 +216,7 @@
                                 <button class="block w-full max-w-xs mx-auto bg-blue-500 hover:bg-blue-700 focus:bg-blue-700 text-white rounded-lg px-3 py-3 font-semibold">REGISTRATE AHORA</button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

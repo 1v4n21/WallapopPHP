@@ -19,13 +19,16 @@
         $usuario = $usuariosDAO->getBySid($_COOKIE['sid']);
 
         if ($usuario) {
+
             // Inicio sesión
             Sesion::iniciarSesion($usuario);
 
             // Creamos la cookie para que nos recuerde 7 días
             setcookie('sid', $usuario->getSid(), time() + 7 * 24 * 60 * 60, '/');
-        }
 
+        } else {
+            echo "No se pudo iniciar sesión automáticamente.";
+        }
     }
 
     // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
@@ -76,73 +79,145 @@
 </head>
 <body class="bg-gradient-to-b bg-blue-500 to-teal-700 text-white">
     <header>
-        <!--Menu de navegacion con CSS-->
+        <?php if(Sesion::getUsuario()): ?>
 
-        <nav id="navbar">
-        <ul class="navbar-items flexbox-col">
-            <li class="navbar-logo flexbox-left">
-            <a class="navbar-item-inner flexbox">
-                <img src="images/favicon-32x32.png" alt="Imagen">
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a href="index.php" class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-solid fa-box-archive fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Anuncios</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a href="misAnuncios.php" class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Mis Anuncios</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Mis compras</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Chat</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a href="login.php" class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-solid fa-circle-check fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Login</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a href="registro.php" class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <i class="fa-regular fa-registered fa-beat-fade"></i>
-                </div>
-                <span class="link-text">Registro</span>
-            </a>
-            </li>
-            <li class="navbar-item flexbox-left">
-            <a class="navbar-item-inner flexbox-left">
-                <div class="navbar-item-inner-icon-wrapper flexbox">
-                <ion-icon name="settings-outline"></ion-icon>
-                </div>
-                <span class="link-text">Settings</span>
-            </a>
-            </li>
-        </ul>
-        </nav>
+            <!--Menu de navegacion con CSS si esta logueado el usuario-->
+            <nav id="navbar">
+                <ul class="navbar-items flexbox-col">
+
+                    <!-- Logotipo -->
+                    <li class="navbar-logo flexbox-left">
+                        <a class="navbar-item-inner flexbox">
+                            <img src="images/favicon-32x32.png" alt="Imagen">
+                        </a>
+                    </li>
+
+                    <!-- Anuncios -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="index.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-box-archive fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Anuncios</span>
+                        </a>
+                    </li>
+
+                    <!-- Mis Anuncios -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="misAnuncios.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Mis Anuncios</span>
+                        </a>
+                    </li>
+
+                    <!-- Mis Compras -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Mis compras</span>
+                        </a>
+                    </li>
+
+                    <!-- Chat -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Chat</span>
+                        </a>
+                    </li>
+
+                    <!-- Login -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="index.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-user fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text"><?= Sesion::getUsuario()->getEmail() ?></span>
+                        </a>
+                    </li>
+
+                    <!-- Registro -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="logout.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-right-from-bracket fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Cerrar Sesion</span>
+                        </a>
+                    </li>
+
+                    <!-- Filtro -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Busqueda</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <?php else: ?>
+
+            <!--Menu de navegacion con CSS si no esta logueado el usuario-->
+            <nav id="navbar">
+                <ul class="navbar-items flexbox-col">
+
+                    <!-- Logotipo -->
+                    <li class="navbar-logo flexbox-left">
+                        <a class="navbar-item-inner flexbox">
+                            <img src="images/favicon-32x32.png" alt="Imagen">
+                        </a>
+                    </li>
+
+                    <!-- Anuncios -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="index.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-box-archive fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Anuncios</span>
+                        </a>
+                    </li>
+
+                    <!-- Login -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="login.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-user-lock fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Login</span>
+                        </a>
+                    </li>
+
+                    <!-- Registro -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="registro.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-user-plus fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Registro</span>
+                        </a>
+                    </li>
+
+                    <!-- Filtro -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Busqueda</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </header>
     <main id="main" class="flexbox-col">
 

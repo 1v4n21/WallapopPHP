@@ -36,7 +36,7 @@
             // Redirigimos a index.php
             header('location: index.php');
             die();
-            
+
         } else {
             // Email o contraseña incorrectos. Mostrar mensaje de error
             guardarMensaje("Email o contraseña incorrectos. Por favor, verifica tus credenciales.");
@@ -48,7 +48,7 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

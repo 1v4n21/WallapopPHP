@@ -14,6 +14,7 @@ class Sesion{
 
     static public function cerrarSesion(){
         unset($_SESSION['usuario']);
+        session_destroy();
     }
 }
 /**
