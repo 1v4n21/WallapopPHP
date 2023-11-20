@@ -35,6 +35,10 @@
 
             // Redirigimos a index.php
             header('location: index.php');
+
+            //Mensaje de login con exito
+            guardarMensajeC(Sesion::getUsuario()->getEmail() . ' ha realizado un inicio de sesion con exito');
+
             die();
 
         } else {

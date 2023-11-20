@@ -52,7 +52,7 @@ class AnunciosDAO{
 
     // Método para obtener todos los anuncios no vendidos
     public function getAnunciosNoVendidos(): array {
-        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false")) {
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false ORDER BY fecha_creacion")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
 

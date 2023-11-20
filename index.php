@@ -3,6 +3,8 @@
     require_once 'modelos/ConexionDB.php';
     require_once 'modelos/Usuario.php';
     require_once 'modelos/UsuariosDAO.php';
+    require_once 'modelos/Anuncio.php';
+    require_once 'modelos/AnunciosDAO.php';
     require_once 'modelos/funciones.php';
     require_once 'modelos/config.php';
     require_once 'modelos/Sesion.php';
@@ -30,6 +32,10 @@
             echo "No se pudo iniciar sesión automáticamente.";
         }
     }
+
+    //Creamos el objeto anuncioDAO para acceder a BDD
+    $anuncioDAO = new AnunciosDAO($conn);
+    $anuncios = $anuncioDAO->getAnunciosNoVendidos();
 
     // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
     $connexionDB->cerrarConexion();
@@ -68,6 +74,21 @@
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .correcto {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #28a745;
+            border: 1px solid #218838;
+            color: black;
             position: fixed;
             top: 10px;
             left: 50%;
@@ -134,7 +155,7 @@
 
                     <!-- Login -->
                     <li class="navbar-item flexbox-left">
-                        <a href="index.php" class="navbar-item-inner flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
                             <i class="fa-solid fa-user fa-beat-fade"></i>
                             </div>
@@ -224,11 +245,21 @@
         <!-- Mensaje de error -->     
         <?php imprimirMensaje(); ?>
 
+        <!-- Mensaje de correcto -->     
+        <?php imprimirMensajeC(); ?>
+
         <!--JavaScript-->
         <script>
             // Muestra el mensaje de error al cargar la página
             $(document).ready(function () {
                 $(".error").fadeIn().delay(5000).fadeOut();
+            });
+        </script>
+
+        <script>
+            // Muestra el mensaje de correcto al cargar la página
+            $(document).ready(function () {
+                $(".correcto").fadeIn().delay(5000).fadeOut();
             });
         </script>
 
@@ -245,6 +276,24 @@
                 </p>
             </div>
         </section>
+
+        <!-- Mostrar todos los anuncios existentes sin vender -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <?php foreach ($anuncios as $anuncio): ?>
+                <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
+                    <div class="bg-white p-4 rounded shadow">
+                        <h2 class="text-gray-600 text-xl font-semibold mb-2"><?= $anuncio->getTitulo(); ?></h2>
+                        <p class="text-gray-600 mb-2"><?= $anuncio->getDescripcion(); ?></p>
+                        <div class="flex space-x-2 mb-4">
+                            <img src="<?= $anuncio->getFotoPrincipal(); ?>" alt="Foto principal" class="w-full h-48 object-cover mb-4 rounded-lg shadow">
+                        </div>
+                        <p class="text-gray-800 font-semibold"><?= $anuncio->getPrecio() . '€'; ?></p>
+                        <p class="text-sm text-gray-500 mt-2">Fecha de creación: <?= $anuncio->getFechaCreacion() ?></p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
 
     </main>
     <footer>

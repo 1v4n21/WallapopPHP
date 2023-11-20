@@ -1,7 +1,11 @@
 <?php
 
     session_start();
+    require_once 'modelos/ConexionDB.php';
+    require_once 'modelos/Usuario.php';
+    require_once 'modelos/UsuariosDAO.php';
     require_once 'modelos/funciones.php';
+    require_once 'modelos/config.php';
     require_once 'modelos/Sesion.php';
     
     //¡¡Página privada!! Esto impide que puedan ver esta página
@@ -78,89 +82,90 @@
 </head>
 <body class="bg-gradient-to-b bg-blue-500 to-teal-700 text-white">
     <header>
-        <!--Menu de navegacion con CSS-->
 
-        <nav id="navbar">
-            <ul class="navbar-items flexbox-col">
+        <!--Menu de navegacion con CSS si esta logueado el usuario-->
+            <!--Menu de navegacion con CSS si esta logueado el usuario-->
+            <nav id="navbar">
+                <ul class="navbar-items flexbox-col">
 
-                <!-- Logotipo -->
-                <li class="navbar-logo flexbox-left">
-                    <a class="navbar-item-inner flexbox">
-                        <img src="images/favicon-32x32.png" alt="Imagen">
-                    </a>
-                </li>
+                    <!-- Logotipo -->
+                    <li class="navbar-logo flexbox-left">
+                        <a class="navbar-item-inner flexbox">
+                            <img src="images/favicon-32x32.png" alt="Imagen">
+                        </a>
+                    </li>
 
-                <!-- Anuncios -->
-                <li class="navbar-item flexbox-left">
-                    <a href="index.php" class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-solid fa-box-archive fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Anuncios</span>
-                    </a>
-                </li>
+                    <!-- Anuncios -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="index.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-box-archive fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Anuncios</span>
+                        </a>
+                    </li>
 
-                <!-- Mis Anuncios -->
-                <li class="navbar-item flexbox-left">
-                    <a href="misAnuncios.php" class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Mis Anuncios</span>
-                    </a>
-                </li>
+                    <!-- Mis Anuncios -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="misAnuncios.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Mis Anuncios</span>
+                        </a>
+                    </li>
 
-                <!-- Mis Compras -->
-                <li class="navbar-item flexbox-left">
-                    <a class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Mis compras</span>
-                    </a>
-                </li>
+                    <!-- Mis Compras -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Mis compras</span>
+                        </a>
+                    </li>
 
-                <!-- Chat -->
-                <li class="navbar-item flexbox-left">
-                    <a class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Chat</span>
-                    </a>
-                </li>
+                    <!-- Chat -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Chat</span>
+                        </a>
+                    </li>
 
-                <!-- Login -->
-                <li class="navbar-item flexbox-left">
-                    <a href="login.php" class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-solid fa-circle-check fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Login</span>
-                    </a>
-                </li>
+                    <!-- Login -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-user fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text"><?= Sesion::getUsuario()->getEmail() ?></span>
+                        </a>
+                    </li>
 
-                <!-- Registro -->
-                <li class="navbar-item flexbox-left">
-                    <a href="registro.php" class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <i class="fa-regular fa-registered fa-beat-fade"></i>
-                        </div>
-                        <span class="link-text">Registro</span>
-                    </a>
-                </li>
+                    <!-- Registro -->
+                    <li class="navbar-item flexbox-left">
+                        <a href="logout.php" class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-right-from-bracket fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Cerrar Sesion</span>
+                        </a>
+                    </li>
 
-                <!-- Filtro -->
-                <li class="navbar-item flexbox-left">
-                    <a class="navbar-item-inner flexbox-left">
-                        <div class="navbar-item-inner-icon-wrapper flexbox">
-                        <ion-icon name="settings-outline"></ion-icon>
-                        </div>
-                        <span class="link-text">Busqueda</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                    <!-- Filtro -->
+                    <li class="navbar-item flexbox-left">
+                        <a class="navbar-item-inner flexbox-left">
+                            <div class="navbar-item-inner-icon-wrapper flexbox">
+                            <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
+                            </div>
+                            <span class="link-text">Busqueda</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
     </header>
     <main id="main" class="flexbox-col">
         <!--Titulo apartado misAnuncios-->

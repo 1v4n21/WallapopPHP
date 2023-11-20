@@ -4,13 +4,14 @@
         private $idUsuario;
         private $titulo;
         private $descripcion;
-        private $fotoPrincipal;
+        private $foto_principal;
         private $foto2;
         private $foto3;
         private $foto4;
         private $precio;
-        private $fechaCreacion;
+        private $fecha_creacion;
         private $vendido;
+
         
 
         /**
@@ -86,19 +87,19 @@
         }
 
         /**
-         * Get the value of fotoPrincipal
+         * Get the value of foto_principal
          */
         public function getFotoPrincipal()
         {
-                return $this->fotoPrincipal;
+                return $this->foto_principal;
         }
 
         /**
-         * Set the value of fotoPrincipal
+         * Set the value of foto_principal
          */
-        public function setFotoPrincipal($fotoPrincipal): self
+        public function setFotoPrincipal($foto_principal): self
         {
-                $this->fotoPrincipal = $fotoPrincipal;
+                $this->foto_principal = $foto_principal;
 
                 return $this;
         }
@@ -176,19 +177,19 @@
         }
 
         /**
-         * Get the value of fechaCreacion
+         * Get the value of fecha_creacion
          */
         public function getFechaCreacion()
         {
-                return $this->fechaCreacion;
+                return $this->fecha_creacion;
         }
 
         /**
-         * Set the value of fechaCreacion
+         * Set the value of fecha_creacion
          */
-        public function setFechaCreacion($fechaCreacion): self
+        public function setFechaCreacion($fecha_creacion): self
         {
-                $this->fechaCreacion = $fechaCreacion;
+                $this->fecha_creacion = $fecha_creacion;
 
                 return $this;
         }
@@ -210,5 +211,5 @@
 
                 return $this;
         }
-    }    
-?>
+    }
+        
