@@ -50,11 +50,14 @@ class AnunciosDAO{
         return $array_anuncios;
     }
 
-    // Método para obtener todos los anuncios no vendidos
-    public function getAnunciosNoVendidos(): array {
-        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false ORDER BY fecha_creacion")) {
+    // Método para obtener todos los anuncios no vendidos paginacion
+    public function getAnunciosNoVendidosP($inicio): array {
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false ORDER BY fecha_creacion LIMIT ?, 5")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
+
+        // Vincular los parámetros de la consulta
+        $stmt->bind_param("i", $inicio);
 
         // Ejecutamos la SQL
         $stmt->execute();
@@ -70,4 +73,56 @@ class AnunciosDAO{
 
         return $array_anuncios;
     }
+
+    //Obtener la cantidad de anuncios no vendidos existentes
+    public function getTotalAnunciosNoVendidos(): int {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT COUNT(*) FROM anuncios WHERE vendido = false")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $stmt->bind_result($totalAnuncios);
+    
+        // Recuperar el valor
+        $stmt->fetch();
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $totalAnuncios;
+    }
+
+    //Obtener los anuncios del usuario logueado
+    public function getAnunciosPorUsuario($idUsuario): array {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE IdUsuario = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Vincular el parámetro
+        $stmt->bind_param("s", $idUsuario);
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $result = $stmt->get_result();
+    
+        $arrayAnuncios = array();
+    
+        // Recorrer los resultados y almacenar en un array
+        while ($anuncio = $result->fetch_object(Anuncio::class)) {
+            $arrayAnuncios[] = $anuncio;
+        }
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $arrayAnuncios;
+    }
+    
 }

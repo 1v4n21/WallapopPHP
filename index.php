@@ -33,9 +33,24 @@
         }
     }
 
+    //Paginacion de anuncios
+    $paginaActual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+
     //Creamos el objeto anuncioDAO para acceder a BDD
     $anuncioDAO = new AnunciosDAO($conn);
-    $anuncios = $anuncioDAO->getAnunciosNoVendidos();
+    $anuncios = $anuncioDAO->getAnunciosNoVendidosP(($paginaActual - 1) * 5);
+
+    // Calcular el total de anuncios no vendidos
+    $totalAnuncios = $anuncioDAO->getTotalAnunciosNoVendidos();
+
+    // Calcular el total de páginas
+    $totalPaginas = ceil($totalAnuncios / 5);
+
+    // Verificar si hay una página anterior
+    $paginaAnterior = max(1, $paginaActual - 1);
+
+    // Verificar si hay una página siguiente
+    $paginaSiguiente = min($totalPaginas, $paginaActual + 1);
 
     // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
     $connexionDB->cerrarConexion();
@@ -284,8 +299,8 @@
                     <div class="bg-white p-4 rounded shadow">
                         <h2 class="text-gray-600 text-xl font-semibold mb-2"><?= $anuncio->getTitulo(); ?></h2>
                         <p class="text-gray-600 mb-2"><?= $anuncio->getDescripcion(); ?></p>
-                        <div class="flex space-x-2 mb-4">
-                            <img src="<?= $anuncio->getFotoPrincipal(); ?>" alt="Foto principal" class="w-full h-48 object-cover mb-4 rounded-lg shadow">
+                        <div class="flex mb-4">
+                            <img src="<?= $anuncio->getFotoPrincipal(); ?>" alt="Foto principal" class="w-full h-48 object-cover rounded-lg shadow">
                         </div>
                         <p class="text-gray-800 font-semibold"><?= $anuncio->getPrecio() . '€'; ?></p>
                         <p class="text-sm text-gray-500 mt-2">Fecha de creación: <?= $anuncio->getFechaCreacion() ?></p>
@@ -293,6 +308,24 @@
                 </div>
             <?php endforeach; ?>
         </div>
+
+        
+        <br>
+
+        <!-- Paginación para los anuncios -->
+        <div class="flex items-center justify-between p-4 bg-blue-500 text-white border-t-4 border-b-4 border-blue-700">
+            <?php if ($paginaActual > 1): ?>
+                <a href="?pagina=<?php echo $paginaAnterior; ?>" class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">Página Anterior&nbsp;</a>
+            <?php endif; ?>
+
+            <span class="text-gray-200"><?php echo "Página $paginaActual de $totalPaginas"; ?></span>
+
+            <?php if ($paginaActual < $totalPaginas): ?>
+                <a href="?pagina=<?php echo $paginaSiguiente; ?>" class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">&nbsp;Página Siguiente</a>
+            <?php endif; ?>
+        </div>
+
+
 
 
     </main>
