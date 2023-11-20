@@ -6,7 +6,7 @@
     //Borramos la variable de sesión y volvemos a index.php
     Sesion::cerrarSesion();
 
-    setcookie('sid','',0); //Borra la cookie
+    setcookie('sid','',0,'/'); //Borra la cookie
 
     header('Location: index.php');
 

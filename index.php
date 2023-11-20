@@ -27,9 +27,6 @@
 
             // Creamos la cookie para que nos recuerde 7 días
             setcookie('sid', $usuario->getSid(), time() + 7 * 24 * 60 * 60, '/');
-
-        } else {
-            echo "No se pudo iniciar sesión automáticamente.";
         }
     }
 
@@ -324,10 +321,7 @@
                 <a href="?pagina=<?php echo $paginaSiguiente; ?>" class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">&nbsp;Página Siguiente</a>
             <?php endif; ?>
         </div>
-
-
-
-
+        <br>
     </main>
     <footer>
         <!--Footer de la web, con TailWind, parecido a Bootsrap-->

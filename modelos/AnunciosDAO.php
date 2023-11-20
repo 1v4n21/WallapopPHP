@@ -52,7 +52,7 @@ class AnunciosDAO{
 
     // Método para obtener todos los anuncios no vendidos paginacion
     public function getAnunciosNoVendidosP($inicio): array {
-        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false ORDER BY fecha_creacion LIMIT ?, 5")) {
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE vendido = false ORDER BY fecha_creacion DESC LIMIT ?, 5")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
 
