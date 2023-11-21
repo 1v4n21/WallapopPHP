@@ -18,6 +18,18 @@
         die();
     }
 
+    //Limpiamos los datos
+    $titulo = htmlentities($_POST['titulo']);
+    $descripcion = htmlentities($_POST['descripcion']);
+    $fotoPrincipal = '';
+    $foto2 = '';
+    $foto3 = '';
+    $foto4 = '';
+    $precio = htmlentities($_POST['precio']);
+
+    //Conectamos con la BD
+    $connexionDB = new ConexionDB(MYSQL_USER,MYSQL_PASS,MYSQL_HOST,MYSQL_DB);
+    $conn = $connexionDB->getConnexion();
 
 
 ?>
@@ -41,6 +53,10 @@
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
     <link rel="manifest" href="images/site.webmanifest">
+
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 </head>
 <body class="p-6 bg-gray-900">
     <!--Formulario de creacion de Anuncio con TailWind, parecido a Bootsrap-->
@@ -48,9 +64,8 @@
     <div class="max-w-md mx-auto bg-white rounded-md p-8 shadow-md">
 
         <!-- Icono en la esquina superior izquierda -->
-        <a href="misAnuncios.php" class="fixed top-4 left-4 p-4 bg-blue-500 text-white flex items-center z-50 border border-white rounded-md hover:bg-blue-700">
-            <img src="images/favicon-32x32.png" alt="Icono de la web" class="w-8 h-8">
-            <span class="font-bold ml-2">ShopSwap</span>
+        <a href="misAnuncios.php" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
+            <i class="fas fa-arrow-left text-2xl"></i>
         </a>
 
         

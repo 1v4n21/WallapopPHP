@@ -300,9 +300,10 @@ $connexionDB->cerrarConexion();
         <!-- Mostrar todos los anuncios existentes sin vender -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach ($anuncios as $anuncio): ?>
-                <a href="verAnuncio.php" class="anuncio-enlace">
+                <a href="verAnuncio.php?id=<?= $anuncio->getId() ?>&ruta=index.php" class="anuncio-enlace">
                     <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
                         <div class="bg-white p-4 rounded shadow">
+
                             <!-- Titulo -->
                             <h2 class="text-gray-600 text-xl font-semibold mb-2">
                                 <?= $anuncio->getTitulo(); ?>
@@ -323,6 +324,7 @@ $connexionDB->cerrarConexion();
                             <p class="text-sm text-gray-500 mt-2">
                                 <?= $anuncio->diasDesdeCreacion(); ?>
                             </p>
+                            
                         </div>
                     </div>
                 </a>

@@ -265,10 +265,10 @@ $connexionDB->cerrarConexion();
             </a>
         </div>
 
-        <!-- Mostrar todos los anuncios existentes sin vender -->
+        <!-- Mostrar todos los anuncios existentes de un usuario -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach ($anuncios as $anuncio): ?>
-                <a href="tu_url_especifica_aqui" class="anuncio-enlace">
+                <a href="verAnuncio.php?id=<?= $anuncio->getId() ?>&ruta=misAnuncios.php" class="anuncio-enlace">
                     <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
                         <div class="bg-white p-4 rounded shadow">
                             <!-- Titulo -->

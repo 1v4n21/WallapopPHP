@@ -25,6 +25,7 @@
     //Creamos el objeto AnunciosDAO para acceder a BBDD a través de este objeto
     $anunciosDA0 = new AnunciosDAO($conn);
 
+    //Seguridad
     if(!isset($_GET["id"])){
         header("location: index.php");
         guardarMensaje("No puedes acceder a este apartado");

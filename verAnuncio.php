@@ -1,6 +1,51 @@
 <?php
 
+session_start();
+require_once 'modelos/ConexionDB.php';
+require_once 'modelos/Usuario.php';
+require_once 'modelos/UsuariosDAO.php';
+require_once 'modelos/Anuncio.php';
+require_once 'modelos/AnunciosDAO.php';
+require_once 'modelos/funciones.php';
+require_once 'modelos/config.php';
+require_once 'modelos/Sesion.php';
 
+// Seguridad
+if (!isset($_GET["id"]) || !isset($_GET["ruta"])) {
+    header("location: index.php");
+    guardarMensaje("No puedes acceder a este apartado");
+    die();
+}
+
+// Creamos la conexión utilizando la clase que hemos creado
+$connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+$conn = $connexionDB->getConnexion();
+
+//Obtener la ruta de donde venimos
+$ruta = $_GET['ruta'];
+
+//Creamos el objeto anuncioDAO para acceder a BDD
+$anuncioDAO = new AnunciosDAO($conn);
+$anuncio = $anuncioDAO->getAnuncioPorId($_GET["id"]);
+
+//Obtenemos las fotos del anuncio
+$fotos = $anuncioDAO->obtenerNombresFotosPorIdAnuncio($_GET["id"]);
+
+//Obtenemos el autor del anuncio
+$usuarioDAO = new UsuariosDAO($conn);
+$usuario = $usuarioDAO->getByEmail($anuncio->getIdUsuario());
+
+//Obtener id
+if(Sesion::getUsuario()){
+    $usuarioLogueadoId = Sesion::getUsuario()->getEmail();
+}else{
+    $usuarioLogueadoId = "";
+}
+
+$creadorAnuncioId = $anuncio->getIdUsuario(); 
+
+// Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+$connexionDB->cerrarConexion();
 
 ?>
 <!DOCTYPE html>
@@ -30,47 +75,70 @@
 <body class="bg-gray-500">
 
     <!-- Icono en la esquina superior izquierda -->
-    <a href="index.php" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
+    <a href="<?= $ruta ?>" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
         <i class="fas fa-arrow-left text-2xl"></i>
     </a>
 
     <!-- Anuncio -->
     <div class="container mx-auto mt-8">
         <div class="max-w-2xl bg-white p-8 mx-auto rounded shadow">
-            <h1 class="text-2xl font-bold mb-4">Título del Anuncio</h1>
+
+            <!-- Titulo del anuncio -->
+            <h1 class="text-2xl font-bold mb-4"><?= $anuncio->getTitulo() ?></h1>
 
             <!-- Carrusel de Fotos (utilizando la librería Glide.js) -->
             <div class="glide">
                 <div class="glide__track" data-glide-el="track">
                     <ul class="glide__slides">
-                        <li class="glide__slide"><img src="fotosAnuncios/hola.jpg" alt="Foto 1"></li>
-                        <li class="glide__slide"><img src="fotosAnuncios/foto.jpg" alt="Foto 2"></li>
-                        <li class="glide__slide"><img src="fotosAnuncios/hola.jpg" alt="Foto 3"></li>
-                        <li class="glide__slide"><img src="fotosAnuncios/hola.jpg" alt="Foto 4"></li>
+                        <?php foreach ($fotos as $index => $foto): ?>
+                            <li class="glide__slide">
+                                <img src="<?= "fotosAnuncios/".$foto ?>" alt="Foto <?= (intval($index) + 1) ?>">
+                            </li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
                 <div class="glide__bullets" data-glide-el="controls[nav]">
-                    <button class="glide__bullet" data-glide-dir="=0"></button>
-                    <button class="glide__bullet" data-glide-dir="=1"></button>
-                    <button class="glide__bullet" data-glide-dir="=2"></button>
-                    <button class="glide__bullet" data-glide-dir="=3"></button>
+                    <?php foreach ($fotos as $index => $foto): ?>
+                        <button class="glide__bullet" data-glide-dir="=<?= $index ?>"></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <p class="text-xl font-bold mt-4">Precio: $100</p>
+            <!-- Precio -->
+            <p class="text-xl font-bold mt-4"><?= $anuncio->getPrecio() . "€"?></p>
             <br>
-            <p class="text-gray-600 mb-4">Descripción del anuncio Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <br>
-            <p class="text-gray-600">Dueño del Anuncio: Usuario123</p>
-            <p class="text-gray-600">Localidad: Ciudad Ejemplo</p>
-            <br>
-            <p class="text-gray-600">Fecha de Creación: 01/01/2023</p>
 
-            <!-- Botones -->
-            <div class="flex justify-between mt-8">
-                <button class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</button>
-                <button class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Iniciar Chat</button>
-            </div>
+            <!-- Descripcion -->
+            <p class="text-gray-600 mb-4"><?= $anuncio->getDescripcion() ?></p>
+            <br>
+
+            <!-- Dueño del anuncio -->
+            <hr class="my-4">
+            <p class="text-gray-600">
+                <strong class="text-lg"><?= $usuario->getNombre() ?></strong>
+                &nbsp;&nbsp;&nbsp;<span class="bg-yellow-300 px-2 py-1 rounded-md">Anunciante</span>
+            </p>
+            <hr class="my-4">
+
+            <!-- Fecha de creacion -->
+            <p class="text-gray-600">Fecha de Creación: <?= $anuncio->getFechaCreacion() ?></p>
+            <br>
+
+            <!-- Localidad del anuncio -->
+            <p class="text-gray-600">Localidad: <?= $usuario->getPoblacion() ?></p>
+            
+
+            <!-- Botones y Mensaje (se muestran solo si el usuario logueado no es el creador del anuncio) -->
+            <?php if ($usuarioLogueadoId !== $creadorAnuncioId): ?>
+                <div class="flex justify-between mt-8">
+                    <button class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</button>
+                    <button class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Iniciar Chat</button>
+                </div>
+            <?php elseif ($usuarioLogueadoId === $creadorAnuncioId): ?>
+                <div class="mt-8 bg-green-200 p-4 rounded">
+                    <p class="text-green-800 font-semibold">¡Este anuncio es tuyo!</p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
     <br>
