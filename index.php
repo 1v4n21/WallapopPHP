@@ -1,63 +1,64 @@
 <?php
-    session_start();
-    require_once 'modelos/ConexionDB.php';
-    require_once 'modelos/Usuario.php';
-    require_once 'modelos/UsuariosDAO.php';
-    require_once 'modelos/Anuncio.php';
-    require_once 'modelos/AnunciosDAO.php';
-    require_once 'modelos/funciones.php';
-    require_once 'modelos/config.php';
-    require_once 'modelos/Sesion.php';
+session_start();
+require_once 'modelos/ConexionDB.php';
+require_once 'modelos/Usuario.php';
+require_once 'modelos/UsuariosDAO.php';
+require_once 'modelos/Anuncio.php';
+require_once 'modelos/AnunciosDAO.php';
+require_once 'modelos/funciones.php';
+require_once 'modelos/config.php';
+require_once 'modelos/Sesion.php';
 
-    // Creamos la conexión utilizando la clase que hemos creado
-    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
-    $conn = $connexionDB->getConnexion();
+// Creamos la conexión utilizando la clase que hemos creado
+$connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+$conn = $connexionDB->getConnexion();
 
-    // Si existe la cookie y no ha iniciado sesión, le iniciamos sesión de forma automática
-    if (!Sesion::getUsuario() && isset($_COOKIE['sid'])) {
+// Si existe la cookie y no ha iniciado sesión, le iniciamos sesión de forma automática
+if (!Sesion::getUsuario() && isset($_COOKIE['sid'])) {
 
-        // Nos conectamos para obtener el id y la foto del usuario
-        $usuariosDAO = new UsuariosDAO($conn);
-        $usuario = $usuariosDAO->getBySid($_COOKIE['sid']);
+    // Nos conectamos para obtener el id y la foto del usuario
+    $usuariosDAO = new UsuariosDAO($conn);
+    $usuario = $usuariosDAO->getBySid($_COOKIE['sid']);
 
-        if ($usuario) {
+    if ($usuario) {
 
-            // Inicio sesión
-            Sesion::iniciarSesion($usuario);
+        // Inicio sesión
+        Sesion::iniciarSesion($usuario);
 
-            // Creamos la cookie para que nos recuerde 7 días
-            setcookie('sid', $usuario->getSid(), time() + 7 * 24 * 60 * 60, '/');
-        }
+        // Creamos la cookie para que nos recuerde 7 días
+        setcookie('sid', $usuario->getSid(), time() + 7 * 24 * 60 * 60, '/');
     }
+}
 
-    //Paginacion de anuncios
-    $paginaActual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+//Paginacion de anuncios
+$paginaActual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
 
-    //Creamos el objeto anuncioDAO para acceder a BDD
-    $anuncioDAO = new AnunciosDAO($conn);
-    $anuncios = $anuncioDAO->getAnunciosNoVendidosP(($paginaActual - 1) * 5);
+//Creamos el objeto anuncioDAO para acceder a BDD
+$anuncioDAO = new AnunciosDAO($conn);
+$anuncios = $anuncioDAO->getAnunciosNoVendidosP(($paginaActual - 1) * 5);
 
-    // Calcular el total de anuncios no vendidos
-    $totalAnuncios = $anuncioDAO->getTotalAnunciosNoVendidos();
+// Calcular el total de anuncios no vendidos
+$totalAnuncios = $anuncioDAO->getTotalAnunciosNoVendidos();
 
-    // Calcular el total de páginas
-    $totalPaginas = ceil($totalAnuncios / 5);
+// Calcular el total de páginas
+$totalPaginas = ceil($totalAnuncios / 5);
 
-    // Verificar si hay una página anterior
-    $paginaAnterior = max(1, $paginaActual - 1);
+// Verificar si hay una página anterior
+$paginaAnterior = max(1, $paginaActual - 1);
 
-    // Verificar si hay una página siguiente
-    $paginaSiguiente = min($totalPaginas, $paginaActual + 1);
+// Verificar si hay una página siguiente
+$paginaSiguiente = min($totalPaginas, $paginaActual + 1);
 
-    // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
-    $connexionDB->cerrarConexion();
+// Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+$connexionDB->cerrarConexion();
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShopSwap</title>
+    <title>Inicio - ShopSwap</title>
 
     <!--Link general CSS-->
     <link rel="stylesheet" href="estilo.css">
@@ -68,8 +69,10 @@
     <!-- Link jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-    <!--Link para los iconos-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--Link para los iconos FontAwesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!--Iconos para la web-->
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
@@ -110,9 +113,10 @@
         }
     </style>
 </head>
+
 <body class="bg-gradient-to-b bg-blue-500 to-teal-700 text-white">
     <header>
-        <?php if(Sesion::getUsuario()): ?>
+        <?php if (Sesion::getUsuario()): ?>
 
             <!--Menu de navegacion con CSS si esta logueado el usuario-->
             <nav id="navbar">
@@ -129,7 +133,7 @@
                     <li class="navbar-item flexbox-left">
                         <a href="index.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-box-archive fa-beat-fade"></i>
+                                <i class="fa-solid fa-box-archive fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Anuncios</span>
                         </a>
@@ -139,7 +143,7 @@
                     <li class="navbar-item flexbox-left">
                         <a href="misAnuncios.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
+                                <i class="fa-solid fa-boxes-packing fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Mis Anuncios</span>
                         </a>
@@ -149,7 +153,7 @@
                     <li class="navbar-item flexbox-left">
                         <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
+                                <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Mis compras</span>
                         </a>
@@ -159,27 +163,29 @@
                     <li class="navbar-item flexbox-left">
                         <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
+                                <i class="fa-brands fa-rocketchat fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Chat</span>
                         </a>
                     </li>
 
-                    <!-- Login -->
+                    <!-- Usuario -->
                     <li class="navbar-item flexbox-left">
                         <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-user fa-beat-fade"></i>
+                                <i class="fa-solid fa-user fa-beat-fade"></i>
                             </div>
-                            <span class="link-text"><?= Sesion::getUsuario()->getEmail() ?></span>
+                            <span class="link-text">
+                                <?= Sesion::getUsuario()->getEmail() ?>
+                            </span>
                         </a>
                     </li>
 
-                    <!-- Registro -->
+                    <!-- Cerrar Sesion -->
                     <li class="navbar-item flexbox-left">
                         <a href="logout.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-right-from-bracket fa-beat-fade"></i>
+                                <i class="fa-solid fa-right-from-bracket fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Cerrar Sesion</span>
                         </a>
@@ -189,7 +195,7 @@
                     <li class="navbar-item flexbox-left">
                         <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
+                                <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Busqueda</span>
                         </a>
@@ -213,7 +219,7 @@
                     <li class="navbar-item flexbox-left">
                         <a href="index.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-box-archive fa-beat-fade"></i>
+                                <i class="fa-solid fa-box-archive fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Anuncios</span>
                         </a>
@@ -223,7 +229,7 @@
                     <li class="navbar-item flexbox-left">
                         <a href="login.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-user-lock fa-beat-fade"></i>
+                                <i class="fa-solid fa-user-lock fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Login</span>
                         </a>
@@ -233,7 +239,7 @@
                     <li class="navbar-item flexbox-left">
                         <a href="registro.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-user-plus fa-beat-fade"></i>
+                                <i class="fa-solid fa-user-plus fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Registro</span>
                         </a>
@@ -243,7 +249,7 @@
                     <li class="navbar-item flexbox-left">
                         <a class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
-                            <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
+                                <i class="fa-solid fa-magnifying-glass fa-beat-fade"></i>
                             </div>
                             <span class="link-text">Busqueda</span>
                         </a>
@@ -254,10 +260,10 @@
     </header>
     <main id="main" class="flexbox-col">
 
-        <!-- Mensaje de error -->     
+        <!-- Mensaje de error -->
         <?php imprimirMensaje(); ?>
 
-        <!-- Mensaje de correcto -->     
+        <!-- Mensaje de correcto -->
         <?php imprimirMensajeC(); ?>
 
         <!--JavaScript-->
@@ -279,46 +285,70 @@
 
         <section class="py-12">
             <div class="container mx-auto text-center">
-                <h1 class="text-4xl font-extrabold mb-4">ShopSwap: Compra y Venta desde Casa</h1>
-                <br>
-                <p class="text-lg leading-relaxed mx-auto max-w-4xl font-semibold">
+                <h1 class="text-4xl font-extrabold mb-4 text-gray-800">ShopSwap: Compra y Venta desde Casa</h1>
+                <p class="text-lg leading-relaxed mx-auto max-w-4xl font-semibold text-white-600">
                     Descubre un universo de compra y venta en línea desde la comodidad de tu hogar con ShopSwap.
-                    <br>
-                    Explora nuestro amplio catálogo de productos, intercambia artículos con otros usuarios y transforma tu experiencia de compras con la conveniencia de la web.
+                </p>
+                <p class="text-lg leading-relaxed mx-auto max-w-4xl font-semibold text-white-600">
+                    Explora nuestro amplio catálogo de productos, intercambia artículos con otros usuarios y transforma
+                    tu experiencia de compras con la conveniencia de la web.
                 </p>
             </div>
         </section>
 
+
         <!-- Mostrar todos los anuncios existentes sin vender -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach ($anuncios as $anuncio): ?>
-                <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
-                    <div class="bg-white p-4 rounded shadow">
-                        <h2 class="text-gray-600 text-xl font-semibold mb-2"><?= $anuncio->getTitulo(); ?></h2>
-                        <p class="text-gray-600 mb-2"><?= $anuncio->getDescripcion(); ?></p>
-                        <div class="flex mb-4">
-                            <img src="<?= $anuncio->getFotoPrincipal(); ?>" alt="Foto principal" class="w-full h-48 object-cover rounded-lg shadow">
+                <a href="verAnuncio.php" class="anuncio-enlace">
+                    <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
+                        <div class="bg-white p-4 rounded shadow">
+                            <!-- Titulo -->
+                            <h2 class="text-gray-600 text-xl font-semibold mb-2">
+                                <?= $anuncio->getTitulo(); ?>
+                            </h2>
+
+                            <!-- Foto Principal -->
+                            <div class="flex mb-4 aspect-w-1">
+                                <img src="<?= "fotosAnuncios/" . $anuncio->getFotoPrincipal(); ?>" alt="Foto principal"
+                                    class="h-48 w-60 object-cover rounded-lg shadow">
+                            </div>
+
+                            <!-- Precio -->
+                            <p class="text-gray-800 font-semibold">
+                                <?= $anuncio->getPrecio() . '€'; ?>
+                            </p>
+
+                            <!-- Antigüedad del anuncio -->
+                            <p class="text-sm text-gray-500 mt-2">
+                                <?= $anuncio->diasDesdeCreacion(); ?>
+                            </p>
                         </div>
-                        <p class="text-gray-800 font-semibold"><?= $anuncio->getPrecio() . '€'; ?></p>
-                        <p class="text-sm text-gray-500 mt-2">Fecha de creación: <?= $anuncio->getFechaCreacion() ?></p>
                     </div>
-                </div>
+                </a>
             <?php endforeach; ?>
         </div>
 
-        
+
+
         <br>
 
         <!-- Paginación para los anuncios -->
         <div class="flex items-center justify-between p-4 bg-blue-500 text-white border-t-4 border-b-4 border-blue-700">
             <?php if ($paginaActual > 1): ?>
-                <a href="?pagina=<?php echo $paginaAnterior; ?>" class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">Página Anterior&nbsp;</a>
+                <a href="?pagina=<?php echo $paginaAnterior; ?>"
+                    class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">Página
+                    Anterior&nbsp;</a>
             <?php endif; ?>
 
-            <span class="text-gray-200"><?php echo "Página $paginaActual de $totalPaginas"; ?></span>
+            <span class="text-gray-200">
+                <?php echo "Página $paginaActual de $totalPaginas"; ?>
+            </span>
 
             <?php if ($paginaActual < $totalPaginas): ?>
-                <a href="?pagina=<?php echo $paginaSiguiente; ?>" class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">&nbsp;Página Siguiente</a>
+                <a href="?pagina=<?php echo $paginaSiguiente; ?>"
+                    class="hover:underline hover:text-blue-300 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">&nbsp;Página
+                    Siguiente</a>
             <?php endif; ?>
         </div>
         <br>
@@ -360,4 +390,5 @@
         </div>
     </footer>
 </body>
+
 </html>

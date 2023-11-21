@@ -97,14 +97,14 @@ class AnunciosDAO{
     }
 
     //Obtener los anuncios del usuario logueado
-    public function getAnunciosPorUsuario($idUsuario): array {
+    public function getAnunciosPorUsuario($idUsuario, $inicio): array {
         // Preparar la consulta SQL
-        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE IdUsuario = ?")) {
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE idUsuario = ? ORDER BY fecha_creacion DESC LIMIT ?, 5")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
     
         // Vincular el parámetro
-        $stmt->bind_param("s", $idUsuario);
+        $stmt->bind_param("si", $idUsuario , $inicio);
     
         // Ejecutar la consulta SQL
         $stmt->execute();
@@ -124,5 +124,117 @@ class AnunciosDAO{
     
         return $arrayAnuncios;
     }
+
+    //Obtener el total de anuncios de un usuario
+    public function getTotalAnunciosUsuario($idUsuario): int {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT COUNT(*) FROM anuncios WHERE idUsuario = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+
+        //Asociar las variables a las interrogaciones(parámetros)
+        $stmt->bind_param('s',$idUsuario);
     
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $stmt->bind_result($totalAnuncios);
+    
+        // Recuperar el valor
+        $stmt->fetch();
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $totalAnuncios;
+    }
+
+    //Obtiene un anuncio por su id
+    public function getAnuncioPorId($idAnuncio): Anuncio {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE id = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Vincular el parámetro
+        $stmt->bind_param("i", $idAnuncio);
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $result = $stmt->get_result();
+    
+        // Obtener el objeto Anuncio
+        $anuncio = $result->fetch_object(Anuncio::class);
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $anuncio;
+    }
+
+    //Elimina un anuncio por su id
+    public function eliminarAnuncioPorId($idAnuncio): bool {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("DELETE FROM anuncios WHERE id = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+            return false;
+        }
+    
+        // Vincular el parámetro
+        $stmt->bind_param("i", $idAnuncio);
+    
+        // Ejecutar la consulta SQL
+        $result = $stmt->execute();
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $result;
+    }
+
+    //Obtener las fotos de un anuncio para eliminarlas tambien
+    public function obtenerNombresFotosPorIdAnuncio($idAnuncio): array {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT foto_principal, foto2, foto3, foto4 FROM anuncios WHERE id = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Vincular el parámetro
+        $stmt->bind_param("i", $idAnuncio);
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $result = $stmt->get_result();
+    
+        // Obtener nombres de fotos
+        $fila = $result->fetch_assoc();
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        // Filtrar valores nulos y devolver un array con los nombres de las fotos
+        return array_filter($fila);
+    }
+
+    //Elimina las fotos asociadas a un anuncio llamando al metodo anterior
+    public function eliminarFotosAnuncio($idAnuncio): void {
+        // Obtener nombres de fotos de la base de datos
+        $nombresFotos = $this->obtenerNombresFotosPorIdAnuncio($idAnuncio);
+    
+        // Carpeta donde se almacenan las fotos
+        $carpetaFotos = "fotosAnuncios/";
+    
+        // Iterar sobre los nombres de las fotos y eliminar cada archivo
+        foreach ($nombresFotos as $nombreFoto) {
+            $rutaFoto = $carpetaFotos . $nombreFoto;
+            if (file_exists($rutaFoto)) {
+                unlink($rutaFoto);
+            }
+        }
+    }
 }

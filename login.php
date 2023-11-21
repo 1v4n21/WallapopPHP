@@ -7,6 +7,13 @@
     require_once 'modelos/Sesion.php';
     require_once 'modelos/config.php';
 
+    //Seguridad
+    if(Sesion::getUsuario()){
+        header("location: index.php");
+        guardarMensaje("Ya has iniciado sesion. No puedes volver a iniciar sesion");
+        die();
+    }
+
     // Creamos la conexión utilizando la clase que hemos creado
     $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
     $conn = $connexionDB->getConnexion();
@@ -56,7 +63,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - ShopSwap</title>
 
     <!--Iconos para la web-->
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
@@ -69,6 +76,9 @@
 
     <!--Link para TailWind-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <!-- CSS -->
     <style>
@@ -91,9 +101,8 @@
 </head>
 <body>
     <!-- Icono en la esquina superior izquierda -->
-    <a href="index.php" class="fixed top-4 left-4 p-4 bg-blue-500 text-white flex items-center z-50 border border-white rounded-md hover:bg-blue-700">
-        <img src="images/favicon-32x32.png" alt="Icono de la web" class="w-8 h-8">
-        <span class="font-bold ml-2">ShopSwap</span>
+    <a href="index.php" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
+        <i class="fas fa-arrow-left text-2xl"></i>
     </a>
 
     <!-- Mensaje de error -->    

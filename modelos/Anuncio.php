@@ -1,5 +1,6 @@
-<?php 
-    class Anuncio {
+<?php
+class Anuncio
+{
         private $id;
         private $idUsuario;
         private $titulo;
@@ -12,7 +13,7 @@
         private $fecha_creacion;
         private $vendido;
 
-        
+
 
         /**
          * Get the value of id
@@ -211,5 +212,22 @@
 
                 return $this;
         }
-    }
-        
+
+        //Obtiene los dias que lleva publicado el anuncio
+        public function diasDesdeCreacion(): string
+        {
+                $fechaCreacion = new DateTime($this->getFechaCreacion());
+                $fechaActual = new DateTime();
+                $diferencia = $fechaActual->diff($fechaCreacion);
+
+                $dias = $diferencia->days;
+
+                if ($dias == 0) {
+                        return "Hoy";
+                } elseif ($dias == 1) {
+                        return "Hace 1 día";
+                } else {
+                        return "Hace " . $dias . " días";
+                }
+        }
+}

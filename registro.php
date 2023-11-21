@@ -7,6 +7,13 @@
     require_once 'modelos/config.php';
     require_once 'modelos/Sesion.php';
 
+    //Seguridad
+    if(Sesion::getUsuario()){
+        header("location: index.php");
+        guardarMensaje("Ya has iniciado sesion. No puedes realizar un registro");
+        die();
+    }
+
     // Creamos la conexión utilizando la clase que hemos creado
     $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
     $conn = $connexionDB->getConnexion();
@@ -30,7 +37,17 @@
         // Verificar si el email ya existe en la base de datos
         $usuarioExistente = $usuariosDAO->getByEmail($email);
 
-        if ($usuarioExistente) {
+        if (empty($nombre) || empty($telefono) || empty($poblacion) || empty($email) || empty($password) || empty($password2)) {
+
+            // Al menos uno de los campos obligatorios está vacío
+            guardarMensaje("Todos los campos son obligatorios. Por favor, completa todos los campos.");
+            
+        } elseif (strlen($telefono) !== 9) {
+
+            // El teléfono no tiene exactamente 9 números
+            guardarMensaje("El campo de teléfono debe tener exactamente 9 números.");
+
+        } elseif ($usuariosDAO->getByEmail($email)) {
 
             // El email ya existe en la base de datos
             guardarMensaje("El email ya está registrado. Por favor, elige otro.");
@@ -40,6 +57,11 @@
             // Las contraseñas no coinciden
             guardarMensaje("Las contraseñas no coinciden.");
 
+        } elseif (strlen($password) < 4) {
+
+            // La contraseña tiene menos de 4 caracteres
+            guardarMensaje("La contraseña debe tener al menos 4 caracteres.");
+
         } else {
 
             //Ciframos la contraseña
@@ -47,7 +69,7 @@
 
             // Crear el nuevo usuario en la base de datos
             $usuario = new Usuario();
-            $usuario->setSid(sha1(rand()+time()), true);
+            $usuario->setSid(sha1(rand()+time()));
             $usuario->setEmail($email);
             $usuario->setPassword($passwordCifrado);
             $usuario->setNombre($nombre);
@@ -59,10 +81,13 @@
                 // Iniciar sesión con el nuevo usuario
                 Sesion::iniciarSesion($usuario);
 
-                setcookie('sid', $usuario->getSid(), time() + 7 * 60 * 60 * 24);
+                setcookie('sid', $usuario->getSid(), time() + 7 * 60 * 60 * 24, '/');
 
                 //Redirecciona a index.php
                 header("location: index.php");
+
+                guardarMensajeC("El usuario " . Sesion::getUsuario()->getEmail() . " ha sido registrado con éxito");
+
                 die();
 
             }else{
@@ -79,7 +104,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
+    <title>Registro - ShopSwap</title>
 
     <!--Iconos para la web-->
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
@@ -89,6 +114,9 @@
 
     <!--Link para TailWind-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <!-- Link jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -114,9 +142,8 @@
 <body>
 
     <!-- Icono en la esquina superior izquierda -->
-    <a href="index.php" class="fixed top-4 left-4 p-4 bg-blue-500 text-white flex items-center z-50 border border-white rounded-md hover:bg-blue-700">
-        <img src="images/favicon-32x32.png" alt="Icono de la web" class="w-8 h-8">
-        <span class="font-bold ml-2">ShopSwap</span>
+    <a href="index.php" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
+        <i class="fas fa-arrow-left text-2xl"></i>
     </a>
 
     <!-- Mensaje de error -->    
@@ -152,7 +179,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Nombre</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                    <input name="nombre" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Jose">
+                                    <input name="nombre" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Jose" value="<?= $nombre ?>">
                                 </div>
                             </div>
 
@@ -161,7 +188,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Numero de Telefono</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
-                                    <input name="telefono" type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="620089213">
+                                    <input name="telefono" type="number" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="620089213" value="<?= $telefono ?>">
                                 </div>
                             </div>
                         </div>
@@ -172,7 +199,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Poblacion</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
-                                    <input name="poblacion" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Tomelloso">
+                                    <input name="poblacion" type="text" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="Tomelloso" value="<?= $poblacion ?>">
                                 </div>
                             </div>
                         </div>
@@ -183,7 +210,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Email</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
-                                    <input name="email" type="email" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="josemartin@example.com">
+                                    <input name="email" type="email" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="josemartin@example.com" value="<?= $email ?>">
                                 </div>
                             </div>
                         </div>
@@ -194,7 +221,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Contraseña</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-lock-outline text-gray-400 text-lg"></i></div>
-                                    <input name="password" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
+                                    <input name="password" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************" value="<?= $password ?>">
                                 </div>
                             </div>
                         </div>
@@ -205,7 +232,7 @@
                                 <label for="" class="text-xs font-semibold px-1">Confirma Contraseña</label>
                                 <div class="flex">
                                     <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-lock-outline text-gray-400 text-lg"></i></div>
-                                    <input name="password1" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************">
+                                    <input name="password1" type="password" class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500" placeholder="************" value="<?= $password2 ?>">
                                 </div>
                             </div>
                         </div>
