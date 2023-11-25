@@ -109,7 +109,7 @@ $connexionDB->cerrarConexion();
             <br>
 
             <!-- Descripcion -->
-            <p class="text-gray-600 mb-4"><?= $anuncio->getDescripcion() ?></p>
+            <p class="text-gray-600 mb-4"><?= htmlspecialchars_decode($anuncio->getDescripcion()) ?></p>
             <br>
 
             <!-- Dueño del anuncio -->

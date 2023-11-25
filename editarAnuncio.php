@@ -1,5 +1,4 @@
 <?php
-
     session_start();
     require_once 'modelos/ConexionDB.php';
     require_once 'modelos/Usuario.php';
@@ -10,103 +9,35 @@
     require_once 'modelos/config.php';
     require_once 'modelos/Sesion.php';
 
-    //¡¡Página privada!! Esto impide que puedan ver esta página
-    //si no han iniciado sesión
-    if(!Sesion::getUsuario()){
+    // Página privada: redirige si no ha iniciado sesión
+    if (!Sesion::getUsuario()) {
         header("location: index.php");
-        guardarMensaje("No puedes subir anuncios si no has iniciado sesion");
+        guardarMensaje("No puedes editar anuncios si no has iniciado sesión");
         die();
     }
 
-    $titulo = $descripcion = $precio = '';
-    $error=false;
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-        // Conectamos con la BD
-        $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
-        $conn = $connexionDB->getConnexion();
-
-        // Limpiamos los datos
-        $titulo = htmlentities($_POST['titulo']);
-        $descripcion = htmlentities($_POST['descripcion']);
-        $fotoPrincipal = '';
-        $foto2 = '';
-        $foto3 = '';
-        $foto4 = '';
-        $precio = htmlentities($_POST['precio']);
-
-        //Validacion datos
-        if (empty($titulo) || empty($descripcion) || empty($precio)) {
-
-            guardarMensaje("Completa los campos obligatorios");
-            $error=true;
-
-        }elseif (strlen($descripcion) > 200){
-
-            guardarMensaje("La descripcion no puede ocupar mas de 200 caracteres");
-            $error=true;
-
-        }elseif(!is_numeric($precio)){
-
-            guardarMensaje("El precio debe ser numerico");
-            $error=true;
-
-        }else{
-            // Constantes para tipos de imagen permitidos
-            define('ALLOWED_IMAGE_TYPES', ['image/jpg', 'image/jpeg', 'image/webp', 'image/gif', 'image/png']);
-
-            // Función para validar y mover la foto
-            function validarYGuardarFoto($file, $folder)
-            {
-                global $error;
-
-                if (!in_array($file['type'], ALLOWED_IMAGE_TYPES)) {
-                    guardarMensaje("Sube un formato valido de imagen ( jpg, jpeg, png, webp, gif )");
-                    $error = true;
-                    return;
-                }
-
-                $nombreArchivo = generarNombreArchivo($file['name']);
-
-                while (file_exists("$folder/$nombreArchivo")) {
-                    $nombreArchivo = generarNombreArchivo($file['name']);
-                }
-
-                if (!move_uploaded_file($file['tmp_name'], "$folder/$nombreArchivo")) {
-                    die("Error al copiar la foto a la carpeta $folder");
-                }
-
-                return $nombreArchivo;
-            }
-
-            // Validación y manejo de la foto principal
-            $fotoPrincipal = validarYGuardarFoto($_FILES['fotoPrincipal'], 'fotosAnuncios');
-
-            // Validación y manejo de las fotos opcionales
-            $foto2 = isset($_FILES['foto2']) && $_FILES['foto2']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto2'], 'fotosAnuncios') : null;
-            $foto3 = isset($_FILES['foto3']) && $_FILES['foto3']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto3'], 'fotosAnuncios') : null;
-            $foto4 = isset($_FILES['foto4']) && $_FILES['foto4']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto4'], 'fotosAnuncios') : null;
-        }
-
-        
-        if ($error == false) {
-
-            //Insertamos en la BD
-            $anuncioDAO = new AnunciosDAO($conn);
-
-            if($anuncioDAO->crearAnuncio(Sesion::getUsuario()->getEmail(), $titulo, $descripcion, $fotoPrincipal, $precio, $vendido=0, $foto2, $foto3, $foto4)){
-                header("location: misAnuncios.php");
-                guardarMensajeC("Anuncio creado con éxito");
-                die();
-            }else{
-                guardarMensaje("No se ha podido insertar el anuncio");
-            }
-        }
-
-        // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
-        $connexionDB->cerrarConexion();
+    // Seguridad
+    if (!isset($_GET["id"])) {
+        header("location: misAnuncios.php");
+        guardarMensaje("No puedes acceder a este apartado");
+        die();
     }
+
+    // Recuperar el ID del anuncio a editar desde la URL
+    $idAnuncio = $_GET["id"];
+
+
+    // Obtener el anuncio existente
+    $anuncioDAO = new AnunciosDAO($conn);
+    $anuncio = $anuncioDAO->getAnuncioPorId($idAnuncio);
+
+    // Validar si el anuncio existe y pertenece al usuario actual
+    if (!$anuncio || $anuncio->getIdUsuario() !== Sesion::getUsuario()->getEmail()) {
+        header("location: misAnuncios.php");
+        guardarMensaje("No puedes editar este anuncio");
+        die();
+    }
+
 
 ?>
 <!DOCTYPE html>
@@ -114,7 +45,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Publicar Anuncio - ShopSwap</title>
+    <title>Editar Anuncio - ShopSwap</title>
 
     <!--Link para TailWind-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
@@ -252,14 +183,14 @@
                 'source': false,
                 'strike': false,
                 'table': false,
-                'left': true,
-                'center': true,
-                'right': true,
+                'left': false,
+                'center': false,
+                'right': false,
+                'uppercase': false,
+                'lowercase': false,
                 'rule': false,
                 'link': false,
-                'lists': false,
-                'ol': false,
-                'ul': false, 
+                'lists': true,
             });
         });
     </script>

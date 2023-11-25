@@ -16,9 +16,9 @@
     setcookie('sid','',0,'/'); //Borra la cookie
 
     //Mensaje de logout con exito
-    guardarMensajeC('Se ha cerrado sesion con exito');
+    guardarMensajeC("Se ha cerrado sesion con éxito");
 
-    header('Location: index.php');
+    header("location: index.php");
 
     die();
 ?>

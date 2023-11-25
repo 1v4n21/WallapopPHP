@@ -9,24 +9,24 @@ class AnunciosDAO{
     }
 
     // Método para crear un nuevo anuncio
-    public function crearAnuncio($idUsuario, $titulo, $descripcion, $fotoPrincipal, $precio, $fechaCreacion, $vendido, $foto2 = null, $foto3 = null, $foto4 = null) {
+    public function crearAnuncio($idUsuario, $titulo, $descripcion, $fotoPrincipal, $precio, $vendido, $foto2, $foto3 , $foto4) {
         // Construimos la consulta SQL con las columnas opcionales
-        $sql = "INSERT INTO anuncios (idUsuario, titulo, descripcion, foto_principal, precio, vendido, foto2, foto3, foto4) VALUES (?, ?, ?, ?, , ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO anuncios (idUsuario, titulo, descripcion, foto_principal, precio, vendido, foto2, foto3, foto4) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         if (!$stmt = $this->conn->prepare($sql)) {
             echo "Error en la SQL: " . $this->conn->error;
         }
 
         // Vinculamos los parámetros
-        $stmt->bind_param("issssssss", $idUsuario, $titulo, $descripcion, $fotoPrincipal, $precio, $vendido, $foto2, $foto3, $foto4);
+        $stmt->bind_param("sssssssss", $idUsuario, $titulo, $descripcion, $fotoPrincipal, $precio, $vendido, $foto2, $foto3, $foto4);
 
-        // Ejecutamos la SQL
-        if (!$stmt->execute()) {
-            echo "Error al ejecutar la SQL: " . $stmt->error;
+        if($stmt->execute()){
+            return $stmt->insert_id;
         }
-
-        // Cerramos la declaración
-        $stmt->close();
+        
+        else{
+            return false;
+        }
     }
 
     // Método para obtener todos los anuncios vendidos
