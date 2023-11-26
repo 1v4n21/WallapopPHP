@@ -1,9 +1,10 @@
-<?php 
-    class Venta{
+<?php
+class Venta
+{
         private $id;
         private $idComprador;
         private $idAnuncio;
-        
+
 
         /**
          * Get the value of id
@@ -58,5 +59,5 @@
 
                 return $this;
         }
-    }
+}
 ?>

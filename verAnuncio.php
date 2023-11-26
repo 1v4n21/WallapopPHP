@@ -36,13 +36,13 @@ $usuarioDAO = new UsuariosDAO($conn);
 $usuario = $usuarioDAO->getByEmail($anuncio->getIdUsuario());
 
 //Obtener id
-if(Sesion::getUsuario()){
+if (Sesion::getUsuario()) {
     $usuarioLogueadoId = Sesion::getUsuario()->getEmail();
-}else{
+} else {
     $usuarioLogueadoId = "";
 }
 
-$creadorAnuncioId = $anuncio->getIdUsuario(); 
+$creadorAnuncioId = $anuncio->getIdUsuario();
 
 // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
 $connexionDB->cerrarConexion();
@@ -50,6 +50,7 @@ $connexionDB->cerrarConexion();
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,10 +73,12 @@ $connexionDB->cerrarConexion();
     <link rel="manifest" href="images/site.webmanifest">
 
 </head>
+
 <body class="bg-gray-500">
 
     <!-- Icono en la esquina superior izquierda -->
-    <a href="<?= $ruta ?>" class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
+    <a href="<?= $ruta ?>"
+        class="fixed top-4 left-4 p-4 text-white flex items-center z-50 rounded-md hover:bg-blue-700 transition-all duration-300">
         <i class="fas fa-arrow-left text-2xl"></i>
     </a>
 
@@ -84,7 +87,9 @@ $connexionDB->cerrarConexion();
         <div class="max-w-2xl bg-white p-8 mx-auto rounded shadow">
 
             <!-- Titulo del anuncio -->
-            <h1 class="text-2xl font-bold mb-4"><?= $anuncio->getTitulo() ?></h1>
+            <h1 class="text-2xl font-bold mb-4">
+                <?= $anuncio->getTitulo() ?>
+            </h1>
 
             <!-- Carrusel de Fotos (utilizando la librería Glide.js) -->
             <div class="glide">
@@ -92,7 +97,7 @@ $connexionDB->cerrarConexion();
                     <ul class="glide__slides">
                         <?php foreach ($fotos as $index => $foto): ?>
                             <li class="glide__slide">
-                                <img src="<?= "fotosAnuncios/".$foto ?>" alt="Foto <?= (intval($index) + 1) ?>">
+                                <img src="<?= "fotosAnuncios/" . $foto ?>" alt="Foto <?= (intval($index) + 1) ?>">
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -105,28 +110,38 @@ $connexionDB->cerrarConexion();
             </div>
 
             <!-- Precio -->
-            <p class="text-xl font-bold mt-4"><?= $anuncio->getPrecio() . "€"?></p>
+            <p class="text-xl font-bold mt-4">
+                <?= $anuncio->getPrecio() . "€" ?>
+            </p>
             <br>
 
             <!-- Descripcion -->
-            <p class="text-gray-600 mb-4"><?= htmlspecialchars_decode($anuncio->getDescripcion()) ?></p>
+            <p class="text-gray-600 mb-4">
+                <?= htmlspecialchars_decode($anuncio->getDescripcion()) ?>
+            </p>
             <br>
 
             <!-- Dueño del anuncio -->
             <hr class="my-4">
             <p class="text-gray-600">
-                <strong class="text-lg"><?= $usuario->getNombre() ?></strong>
+                <strong class="text-lg">
+                    <?= $usuario->getNombre() ?>
+                </strong>
                 &nbsp;&nbsp;&nbsp;<span class="bg-yellow-300 px-2 py-1 rounded-md">Anunciante</span>
             </p>
             <hr class="my-4">
 
             <!-- Fecha de creacion -->
-            <p class="text-gray-600">Fecha de Creación: <?= $anuncio->getFechaCreacion() ?></p>
+            <p class="text-gray-600">Fecha de Creación:
+                <?= $anuncio->getFechaCreacion() ?>
+            </p>
             <br>
 
             <!-- Localidad del anuncio -->
-            <p class="text-gray-600">Localidad: <?= $usuario->getPoblacion() ?></p>
-            
+            <p class="text-gray-600">Localidad:
+                <?= $usuario->getPoblacion() ?>
+            </p>
+
 
             <!-- Botones y Mensaje (se muestran solo si el usuario logueado no es el creador del anuncio) -->
             <?php if ($usuarioLogueadoId !== $creadorAnuncioId): ?>
@@ -136,7 +151,8 @@ $connexionDB->cerrarConexion();
                     </div>
                 <?php else: ?>
                     <div class="flex justify-between mt-8">
-                        <button class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</button>
+                        <a href="comprarAnuncio.php?id=<?= $anuncio->getId() ?>"
+                            class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</a>
                         <button class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Iniciar Chat</button>
                     </div>
                 <?php endif; ?>
@@ -160,11 +176,12 @@ $connexionDB->cerrarConexion();
     <script>
         new Glide('.glide', {
             type: 'carousel',
-            perView: 1, 
+            perView: 1,
             focusAt: 'center',
             gap: 16
         }).mount();
     </script>
 
 </body>
+
 </html>

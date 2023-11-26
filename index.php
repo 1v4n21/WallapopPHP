@@ -324,7 +324,7 @@ $connexionDB->cerrarConexion();
                             <p class="text-sm text-gray-500 mt-2">
                                 <?= $anuncio->diasDesdeCreacion(); ?>
                             </p>
-                            
+
                         </div>
                     </div>
                 </a>

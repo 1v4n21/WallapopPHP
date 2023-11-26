@@ -1,10 +1,11 @@
-<?php 
-    class Mensaje{
+<?php
+class Mensaje
+{
         private $id;
         private $mensaje;
         private $emailAutor;
         private $idRemitente;
-        
+
 
         /**
          * Get the value of id
@@ -77,5 +78,5 @@
 
                 return $this;
         }
-    }
+}
 ?>

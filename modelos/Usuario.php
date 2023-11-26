@@ -1,5 +1,6 @@
-<?php 
-    class Usuario{
+<?php
+class Usuario
+{
         private $id;
         private $sid;
         private $email;
@@ -8,7 +9,7 @@
         private $telefono;
         private $poblacion;
 
-        
+
 
         /**
          * Get the value of id
@@ -135,5 +136,5 @@
 
                 return $this;
         }
-    }   
+}
 ?>

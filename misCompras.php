@@ -1,52 +1,53 @@
 <?php
 
-    session_start();
-    require_once 'modelos/ConexionDB.php';
-    require_once 'modelos/Usuario.php';
-    require_once 'modelos/UsuariosDAO.php';
-    require_once 'modelos/Anuncio.php';
-    require_once 'modelos/AnunciosDAO.php';
-    require_once 'modelos/funciones.php';
-    require_once 'modelos/config.php';
-    require_once 'modelos/Sesion.php';
+session_start();
+require_once 'modelos/ConexionDB.php';
+require_once 'modelos/Usuario.php';
+require_once 'modelos/UsuariosDAO.php';
+require_once 'modelos/Anuncio.php';
+require_once 'modelos/AnunciosDAO.php';
+require_once 'modelos/funciones.php';
+require_once 'modelos/config.php';
+require_once 'modelos/Sesion.php';
 
-    //¡¡Página privada!! Esto impide que puedan ver esta página
-    //si no han iniciado sesión
-    if (!Sesion::getUsuario()) {
-        header("location: index.php");
-        guardarMensaje("No puedes ver tus anuncios si no has iniciado sesion");
-        die();
-    }
+//¡¡Página privada!! Esto impide que puedan ver esta página
+//si no han iniciado sesión
+if (!Sesion::getUsuario()) {
+    header("location: index.php");
+    guardarMensaje("No puedes ver tus anuncios si no has iniciado sesion");
+    die();
+}
 
-    // Creamos la conexión utilizando la clase que hemos creado
-    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
-    $conn = $connexionDB->getConnexion();
+// Creamos la conexión utilizando la clase que hemos creado
+$connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+$conn = $connexionDB->getConnexion();
 
-    //Paginacion de anuncios
-    $paginaActual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+//Paginacion de anuncios
+$paginaActual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
 
-    //Creamos el objeto anuncioDAO para acceder a BDD
-    $anuncioDAO = new AnunciosDAO($conn);
-    $anuncios = $anuncioDAO->getComprasPorUsuario(Sesion::getUsuario()->getEmail(), ($paginaActual - 1) * 5);
+//Creamos el objeto anuncioDAO para acceder a BDD
+$anuncioDAO = new AnunciosDAO($conn);
+$anuncios = $anuncioDAO->getComprasPorUsuario(Sesion::getUsuario()->getEmail(), ($paginaActual - 1) * 5);
 
-    // Calcular el total de anuncios no vendidos
-    $totalAnuncios = $anuncioDAO->getTotalComprasUsuario(Sesion::getUsuario()->getEmail());
+// Calcular el total de anuncios no vendidos
+$totalAnuncios = $anuncioDAO->getTotalComprasUsuario(Sesion::getUsuario()->getEmail());
 
-    // Calcular el total de páginas
-    $totalPaginas = ceil($totalAnuncios / 5);
+// Calcular el total de páginas
+$totalPaginas = ceil($totalAnuncios / 5);
 
-    // Verificar si hay una página anterior
-    $paginaAnterior = max(1, $paginaActual - 1);
+// Verificar si hay una página anterior
+$paginaAnterior = max(1, $paginaActual - 1);
 
-    // Verificar si hay una página siguiente
-    $paginaSiguiente = min($totalPaginas, $paginaActual + 1);
+// Verificar si hay una página siguiente
+$paginaSiguiente = min($totalPaginas, $paginaActual + 1);
 
-    // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
-    $connexionDB->cerrarConexion();
+// Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+$connexionDB->cerrarConexion();
 
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,6 +71,7 @@
     <link rel="manifest" href="images/site.webmanifest">
 
 </head>
+
 <body class="bg-gradient-to-b bg-blue-500 to-teal-700 text-white">
     <header>
 
@@ -268,4 +270,5 @@
         </div>
     </footer>
 </body>
+
 </html>

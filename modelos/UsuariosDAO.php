@@ -1,15 +1,18 @@
 <?php
 
-class UsuariosDAO{
+class UsuariosDAO
+{
     private mysqli $conn;
 
     // Constructor
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         $this->conn = $conn;
     }
 
     // Método para insertar un usuario
-    public function insert(Usuario $usuario): int|bool {
+    public function insert(Usuario $usuario): int|bool
+    {
         $sql = "INSERT INTO usuarios (sid, email, password, nombre, telefono, poblacion) VALUES (?, ?, ?, ?, ?, ?)";
 
         if (!$stmt = $this->conn->prepare($sql)) {
@@ -33,32 +36,32 @@ class UsuariosDAO{
     }
 
     //Obtener por email
-    public function getByEmail($email):Usuario|null {
+    public function getByEmail($email): Usuario|null
+    {
 
-        if(!$stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ?"))
-        {
+        if (!$stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ?")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
 
         //Asociar las variables a las interrogaciones(parámetros)
-        $stmt->bind_param('s',$email);
+        $stmt->bind_param('s', $email);
         //Ejecutamos la SQL
         $stmt->execute();
         //Obtener el objeto mysql_result
         $result = $stmt->get_result();
 
         //Si ha encontrado algún resultado devolvemos un objeto de la clase Mensaje, sino null
-        if($result->num_rows >= 1){
+        if ($result->num_rows >= 1) {
             $usuario = $result->fetch_object(Usuario::class);
             return $usuario;
-        }
-        else{
+        } else {
             return null;
         }
     }
 
     //Obtener por sid
-    public function getBySid($sid): Usuario | null {
+    public function getBySid($sid): Usuario|null
+    {
 
         if (!$stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE sid = ?")) {
             echo "Error en la SQL: " . $this->conn->error;
