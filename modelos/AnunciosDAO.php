@@ -23,10 +23,25 @@ class AnunciosDAO{
         if($stmt->execute()){
             return $stmt->insert_id;
         }
-        
+
         else{
             return false;
         }
+    }
+
+    //Metodo para editar anuncio
+    public function editarAnuncio($idAnuncio, $titulo, $descripcion, $fotoPrincipal, $precio, $foto2, $foto3, $foto4) {
+        // Construimos la consulta SQL con las columnas opcionales
+        $sql = "UPDATE anuncios SET titulo=?, descripcion=?, foto_principal=?, precio=?, foto2=?, foto3=?, foto4=? WHERE id=?";
+    
+        if (!$stmt = $this->conn->prepare($sql)) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Vinculamos los parámetros
+        $stmt->bind_param("sssssssi", $titulo, $descripcion, $fotoPrincipal, $precio, $foto2, $foto3, $foto4, $idAnuncio);
+    
+        return $stmt->execute();
     }
 
     // Método para obtener todos los anuncios vendidos
@@ -129,6 +144,60 @@ class AnunciosDAO{
     public function getTotalAnunciosUsuario($idUsuario): int {
         // Preparar la consulta SQL
         if (!$stmt = $this->conn->prepare("SELECT COUNT(*) FROM anuncios WHERE idUsuario = ?")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+
+        //Asociar las variables a las interrogaciones(parámetros)
+        $stmt->bind_param('s',$idUsuario);
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $stmt->bind_result($totalAnuncios);
+    
+        // Recuperar el valor
+        $stmt->fetch();
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $totalAnuncios;
+    }
+
+    //Obtener las compras del usuario logueado
+    public function getComprasPorUsuario($idUsuario, $inicio): array {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT * FROM anuncios WHERE idComprador = ? AND vendido=1 ORDER BY fecha_creacion DESC LIMIT ?, 5")) {
+            echo "Error en la SQL: " . $this->conn->error;
+        }
+    
+        // Vincular el parámetro
+        $stmt->bind_param("si", $idUsuario , $inicio);
+    
+        // Ejecutar la consulta SQL
+        $stmt->execute();
+    
+        // Obtener el resultado
+        $result = $stmt->get_result();
+    
+        $arrayAnuncios = array();
+    
+        // Recorrer los resultados y almacenar en un array
+        while ($anuncio = $result->fetch_object(Anuncio::class)) {
+            $arrayAnuncios[] = $anuncio;
+        }
+    
+        // Cerrar la declaración
+        $stmt->close();
+    
+        return $arrayAnuncios;
+    }
+
+    //Obtener el total de comprasde un usuario
+    public function getTotalComprasUsuario($idUsuario): int {
+        // Preparar la consulta SQL
+        if (!$stmt = $this->conn->prepare("SELECT COUNT(*) FROM anuncios WHERE idComprador = ? AND vendido=1")) {
             echo "Error en la SQL: " . $this->conn->error;
         }
 

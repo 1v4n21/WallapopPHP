@@ -130,14 +130,26 @@ $connexionDB->cerrarConexion();
 
             <!-- Botones y Mensaje (se muestran solo si el usuario logueado no es el creador del anuncio) -->
             <?php if ($usuarioLogueadoId !== $creadorAnuncioId): ?>
-                <div class="flex justify-between mt-8">
-                    <button class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</button>
-                    <button class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Iniciar Chat</button>
-                </div>
+                <?php if ($anuncio->getVendido()): ?>
+                    <div class="mt-8 bg-red-500 p-4 rounded">
+                        <p class="text-white font-semibold">¡Este anuncio está vendido!</p>
+                    </div>
+                <?php else: ?>
+                    <div class="flex justify-between mt-8">
+                        <button class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">Comprar</button>
+                        <button class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Iniciar Chat</button>
+                    </div>
+                <?php endif; ?>
             <?php elseif ($usuarioLogueadoId === $creadorAnuncioId): ?>
-                <div class="mt-8 bg-green-200 p-4 rounded">
-                    <p class="text-green-800 font-semibold">¡Este anuncio es tuyo!</p>
-                </div>
+                <?php if ($anuncio->getVendido()): ?>
+                    <div class="mt-8 bg-red-500 p-4 rounded">
+                        <p class="text-white font-semibold">¡Este anuncio está vendido!</p>
+                    </div>
+                <?php else: ?>
+                    <div class="mt-8 bg-green-200 p-4 rounded">
+                        <p class="text-green-800 font-semibold">¡Este anuncio es tuyo!</p>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

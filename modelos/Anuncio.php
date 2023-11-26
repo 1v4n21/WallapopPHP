@@ -12,6 +12,7 @@ class Anuncio
         private $precio;
         private $fecha_creacion;
         private $vendido;
+        private $idComprador;
 
 
 
@@ -211,6 +212,16 @@ class Anuncio
                 $this->vendido = $vendido;
 
                 return $this;
+        }
+
+        public function getIdComprador()
+        {
+                return $this->idComprador;
+        }
+
+        public function setIdComprador($idComprador)
+        {
+                $this->idComprador = $idComprador;
         }
 
         //Obtiene los dias que lleva publicado el anuncio

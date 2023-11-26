@@ -151,7 +151,7 @@ $connexionDB->cerrarConexion();
 
                     <!-- Mis Compras -->
                     <li class="navbar-item flexbox-left">
-                        <a class="navbar-item-inner flexbox-left">
+                        <a href="misCompras.php" class="navbar-item-inner flexbox-left">
                             <div class="navbar-item-inner-icon-wrapper flexbox">
                                 <i class="fa-solid fa-basket-shopping fa-beat-fade"></i>
                             </div>

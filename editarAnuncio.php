@@ -23,6 +23,10 @@
         die();
     }
 
+    // Conectamos con la BD
+    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+    $conn = $connexionDB->getConnexion();
+
     // Recuperar el ID del anuncio a editar desde la URL
     $idAnuncio = $_GET["id"];
 
@@ -38,7 +42,89 @@
         die();
     }
 
+    $idAnuncio = $anuncio->getId();
+    $idUsuario = $anuncio->getIdUsuario();
+    $titulo = $anuncio->getTitulo();
+    $descripcion = $anuncio->getDescripcion();
+    $fotoPrincipal = $anuncio->getFotoPrincipal();
+    $foto2 = $anuncio->getFoto2();  
+    $foto3 = $anuncio->getFoto3();
+    $foto4 = $anuncio->getFoto4();
+    $precio = $anuncio->getPrecio();
+    $fecha = $anuncio->getFechaCreacion();
+    $vendido = $anuncio->getVendido();
 
+    $error=false;
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        // Limpiamos los datos
+        $titulo = htmlentities($_POST['titulo']);
+        $descripcion = htmlentities($_POST['descripcion']);
+        $precio = htmlentities($_POST['precio']);
+
+        //Validacion datos
+        if (empty($titulo) || empty($descripcion) || empty($precio)) {
+
+            guardarMensaje("Completa los campos obligatorios");
+            $error=true;
+
+        }elseif (strlen($descripcion) > 200){
+
+            guardarMensaje("La descripcion no puede ocupar mas de 200 caracteres");
+            $error=true;
+
+        }elseif(!is_numeric($precio)){
+
+            guardarMensaje("El precio debe ser numerico");
+            $error=true;
+
+        }else{
+            // Constantes para tipos de imagen permitidos
+            define('ALLOWED_IMAGE_TYPES', ['image/jpg', 'image/jpeg', 'image/webp', 'image/gif', 'image/png']);
+
+            // Función para validar y mover la foto
+            function validarYGuardarFoto($file, $folder)
+            {
+                global $error;
+
+                if (!in_array($file['type'], ALLOWED_IMAGE_TYPES)) {
+                    guardarMensaje("Sube un formato valido de imagen ( jpg, jpeg, png, webp, gif )");
+                    $error = true;
+                    return;
+                }
+
+                $nombreArchivo = generarNombreArchivo($file['name']);
+
+                while (file_exists("$folder/$nombreArchivo")) {
+                    $nombreArchivo = generarNombreArchivo($file['name']);
+                }
+
+                if (!move_uploaded_file($file['tmp_name'], "$folder/$nombreArchivo")) {
+                    die("Error al copiar la foto a la carpeta $folder");
+                }
+
+                return $nombreArchivo;
+            }
+
+            // Validación y manejo de las fotos
+            $fotoPrincipalN = isset($_FILES['fotoPrincipal']) && $_FILES['fotoPrincipal']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['fotoPrincipal'], 'fotosAnuncios') : $fotoPrincipal;
+            $foto2N = isset($_FILES['foto2']) && $_FILES['foto2']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto2'], 'fotosAnuncios') : null;
+            $foto3N = isset($_FILES['foto3']) && $_FILES['foto3']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto3'], 'fotosAnuncios') : null;
+            $foto4N = isset($_FILES['foto4']) && $_FILES['foto4']['error'] === UPLOAD_ERR_OK ? validarYGuardarFoto($_FILES['foto4'], 'fotosAnuncios') : null;
+
+            // Actualizamos en la BD
+            if (!$error) {
+                if ($anuncioDAO->editarAnuncio($idAnuncio, $titulo, $descripcion, $fotoPrincipalN, $precio, $foto2N, $foto3N, $foto4N)) {
+                    header("location: misAnuncios.php");
+                    guardarMensajeC("Anuncio editado con éxito");
+                    die();
+                } else {
+                    guardarMensaje("No se ha podido editar el anuncio");
+                }
+            }
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -105,8 +191,8 @@
         </a>
 
         
-        <h1 class="text-2xl font-semibold mb-6">Añadir Anuncio</h1>
-        <form action="crearAnuncio.php" method="post" enctype="multipart/form-data">
+        <h1 class="text-2xl font-semibold mb-6">Editar Anuncio</h1>
+        <form action="editarAnuncio.php?id=<?= $anuncio->getId() ?>" method="post" enctype="multipart/form-data">
 
             <!-- Titulo -->
             <div class="mb-4">
@@ -157,7 +243,7 @@
 
             <!-- Boton de Enviar -->
             <div class="mt-6">
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105">Publicar Anuncio</button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105">Editar Anuncio</button>
             </div>
 
         </form>

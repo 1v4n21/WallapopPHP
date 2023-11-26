@@ -1,65 +1,62 @@
 <?php
 
-session_start();
-require_once 'modelos/ConexionDB.php';
-require_once 'modelos/Usuario.php';
-require_once 'modelos/UsuariosDAO.php';
-require_once 'modelos/Anuncio.php';
-require_once 'modelos/AnunciosDAO.php';
-require_once 'modelos/funciones.php';
-require_once 'modelos/config.php';
-require_once 'modelos/Sesion.php';
+    session_start();
+    require_once 'modelos/ConexionDB.php';
+    require_once 'modelos/Usuario.php';
+    require_once 'modelos/UsuariosDAO.php';
+    require_once 'modelos/Anuncio.php';
+    require_once 'modelos/AnunciosDAO.php';
+    require_once 'modelos/funciones.php';
+    require_once 'modelos/config.php';
+    require_once 'modelos/Sesion.php';
 
-//¡¡Página privada!! Esto impide que puedan ver esta página
-//si no han iniciado sesión
-if (!Sesion::getUsuario()) {
-    header("location: index.php");
-    guardarMensaje("No puedes ver tus anuncios si no has iniciado sesion");
-    die();
-}
+    //¡¡Página privada!! Esto impide que puedan ver esta página
+    //si no han iniciado sesión
+    if (!Sesion::getUsuario()) {
+        header("location: index.php");
+        guardarMensaje("No puedes ver tus anuncios si no has iniciado sesion");
+        die();
+    }
 
-// Creamos la conexión utilizando la clase que hemos creado
-$connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
-$conn = $connexionDB->getConnexion();
+    // Creamos la conexión utilizando la clase que hemos creado
+    $connexionDB = new ConexionDB(MYSQL_USER, MYSQL_PASS, MYSQL_HOST, MYSQL_DB);
+    $conn = $connexionDB->getConnexion();
 
-//Paginacion de anuncios
-$paginaActual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+    //Paginacion de anuncios
+    $paginaActual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
 
-//Creamos el objeto anuncioDAO para acceder a BDD
-$anuncioDAO = new AnunciosDAO($conn);
-$anuncios = $anuncioDAO->getAnunciosPorUsuario(Sesion::getUsuario()->getEmail(), ($paginaActual - 1) * 5);
+    //Creamos el objeto anuncioDAO para acceder a BDD
+    $anuncioDAO = new AnunciosDAO($conn);
+    $anuncios = $anuncioDAO->getComprasPorUsuario(Sesion::getUsuario()->getEmail(), ($paginaActual - 1) * 5);
 
-// Calcular el total de anuncios no vendidos
-$totalAnuncios = $anuncioDAO->getTotalAnunciosUsuario(Sesion::getUsuario()->getEmail());
+    // Calcular el total de anuncios no vendidos
+    $totalAnuncios = $anuncioDAO->getTotalComprasUsuario(Sesion::getUsuario()->getEmail());
 
-// Calcular el total de páginas
-$totalPaginas = ceil($totalAnuncios / 5);
+    // Calcular el total de páginas
+    $totalPaginas = ceil($totalAnuncios / 5);
 
-// Verificar si hay una página anterior
-$paginaAnterior = max(1, $paginaActual - 1);
+    // Verificar si hay una página anterior
+    $paginaAnterior = max(1, $paginaActual - 1);
 
-// Verificar si hay una página siguiente
-$paginaSiguiente = min($totalPaginas, $paginaActual + 1);
+    // Verificar si hay una página siguiente
+    $paginaSiguiente = min($totalPaginas, $paginaActual + 1);
 
-// Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
-$connexionDB->cerrarConexion();
+    // Cerrar la conexión a la base de datos (puedes hacerlo después de utilizarla)
+    $connexionDB->cerrarConexion();
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Anuncios - ShopSwap</title>
+    <title>Mis Compras - ShopSwap</title>
 
     <!--Link general CSS-->
     <link rel="stylesheet" href="estilo.css">
 
     <!--Link para TailWind-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-
-    <!-- Link jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
     <!--Link para los iconos FontAwesome-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -72,85 +69,7 @@ $connexionDB->cerrarConexion();
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
     <link rel="manifest" href="images/site.webmanifest">
 
-    <style>
-        /* Estilos para el alert */
-        .custom-alert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 52%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background-color: #fff;
-            /* Fondo blanco */
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            border-radius: 5px;
-            color: black;
-            z-index: 1000;
-        }
-
-        .custom-alert p {
-            margin-bottom: 10px;
-        }
-
-        .custom-alert button {
-            padding: 10px;
-            background-color: #3490dc;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .error {
-            display: none;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            position: fixed;
-            top: 10px;
-            left: 52%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .correcto {
-            display: none;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #28a745;
-            border: 1px solid #218838;
-            color: black;
-            position: fixed;
-            top: 10px;
-            left: 52%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var alertShown = localStorage.getItem('customAlertShown');
-            if (!alertShown) {
-                document.getElementById('customAlert').style.display = 'block';
-                localStorage.setItem('customAlertShown', 'true');
-            }
-        });
-
-        function closeCustomAlert() {
-            document.getElementById('customAlert').style.display = 'none';
-        }
-    </script>
 </head>
-
 <body class="bg-gradient-to-b bg-blue-500 to-teal-700 text-white">
     <header>
 
@@ -239,62 +158,19 @@ $connexionDB->cerrarConexion();
             </ul>
         </nav>
     </header>
+
     <main id="main" class="flexbox-col">
-
-        <!-- Mensaje de error -->
-        <?php imprimirMensaje(); ?>
-
-        <!-- Mensaje de correcto -->
-        <?php imprimirMensajeC(); ?>
-
-        <!--JavaScript-->
-        <script>
-            // Muestra el mensaje de error al cargar la página
-            $(document).ready(function () {
-                $(".error").fadeIn().delay(5000).fadeOut();
-            });
-        </script>
-
-        <script>
-            // Muestra el mensaje de correcto al cargar la página
-            $(document).ready(function () {
-                $(".correcto").fadeIn().delay(5000).fadeOut();
-            });
-        </script>
-
-        <!--Titulo apartado misAnuncios-->
+        <!--Titulo apartado misCompras-->
         <section class="py-12">
             <div class="container mx-auto text-center">
-                <h1 class="text-4xl font-extrabold mb-4 text-gray-800">Mis Anuncios</h1>
+                <h1 class="text-4xl font-extrabold mb-4 text-gray-800">Mis Compras</h1>
             </div>
         </section>
 
-        <!--Descripcion del apartado misAnuncios con un alert-->
-
-        <div id="customAlert" class="custom-alert">
-            <p class="text-lg leading-relaxed max-w-3xl">En nuestro intuitivo panel de gestión de anuncios, tienes el
-                control total sobre tus listados. Desde esta sección, puedes explorar, editar y eliminar tus anuncios
-                existentes con facilidad. ¿Quieres actualizar la información o cambiar las imágenes de un artículo? No
-                hay problema. Nuestra plataforma te permite realizar ediciones rápidas y sencillas para asegurarte de
-                que tus productos siempre se presenten de la mejor manera posible.</p>
-            <br>
-            <button onclick="closeCustomAlert()">¡Entendido!</button>
-        </div>
-
-        <!--Boton para acceder al formulario de creacion de anuncio-->
-
-        <div class="fixed top-8 right-8">
-            <a href="crearAnuncio.php"
-                class="bg-green-500 text-white p-4 rounded-full shadow-md flex items-center transition duration-300 ease-in-out transform hover:scale-105">
-                <i class="fas fa-plus mr-2 text-white transition duration-300 ease-in-out"></i>
-                <span class="font-bold text-white">Crear Anuncio</span>
-            </a>
-        </div>
-
-        <!-- Mostrar todos los anuncios existentes de un usuario -->
+        <!-- Mostrar todas las compras existentes de un usuario -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach ($anuncios as $anuncio): ?>
-                <a href="verAnuncio.php?id=<?= $anuncio->getId() ?>&ruta=misAnuncios.php" class="anuncio-enlace">
+                <a href="verAnuncio.php?id=<?= $anuncio->getId() ?>&ruta=misCompras.php" class="anuncio-enlace">
                     <div class="anuncio-container mb-8 transform transition-transform duration-300 hover:scale-105">
                         <div class="bg-white p-4 rounded shadow">
                             <!-- Titulo -->
@@ -320,24 +196,9 @@ $connexionDB->cerrarConexion();
 
                             <!-- Vendido o no vendido -->
                             <?php if ($anuncio->getVendido()): ?>
-                                <p class="text-sm text-red-500 mt-2">¡Vendido!</p>
+                                <p class="text-sm text-red-500 mt-2">¡Comprado!</p>
                             <?php else: ?>
                                 <p class="text-sm text-green-500 mt-2">Disponible para la venta</p>
-
-                                <!-- Botones de editar y eliminar -->
-                                <div class="flex justify-between mt-4">
-                                    <form action="editarAnuncio.php?id=<?= $anuncio->getId() ?>" method="get">
-                                        <input type="hidden" name="id" value="<?= $anuncio->getId(); ?>">
-                                        <button type="submit"
-                                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Editar</button>
-                                    </form>
-
-                                    <form action="borrarAnuncio.php" method="get">
-                                        <input type="hidden" name="id" value="<?= $anuncio->getId(); ?>">
-                                        <button type="submit"
-                                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Eliminar</button>
-                                    </form>
-                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -365,9 +226,11 @@ $connexionDB->cerrarConexion();
                     Siguiente</a>
             <?php endif; ?>
         </div>
+
         <br>
 
     </main>
+
     <footer>
         <!--Footer de la web, con TailWind, parecido a Bootsrap-->
 
@@ -405,5 +268,4 @@ $connexionDB->cerrarConexion();
         </div>
     </footer>
 </body>
-
 </html>

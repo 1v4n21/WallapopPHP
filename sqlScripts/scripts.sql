@@ -20,7 +20,9 @@ CREATE TABLE anuncios (
     precio DECIMAL(10, 2) NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     vendido BOOLEAN NOT NULL,
-    FOREIGN KEY (idUsuario) REFERENCES usuarios(email)
+    idComprador VARCHAR(255),
+    FOREIGN KEY (idUsuario) REFERENCES usuarios(email),
+    FOREIGN KEY (idComprador) REFERENCES usuarios(email)
 );
 
 
